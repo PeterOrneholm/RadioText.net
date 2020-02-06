@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Orneholm.NewsSearch.BatchClient
+namespace Orneholm.RadioText.BatchClient
 {
     public sealed class TranscriptionDefinition
     {

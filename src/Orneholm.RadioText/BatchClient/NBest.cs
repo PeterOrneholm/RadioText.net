@@ -1,4 +1,4 @@
-﻿namespace Orneholm.NewsSearch.BatchClient
+﻿namespace Orneholm.RadioText.BatchClient
 {
     public class NBest
     {

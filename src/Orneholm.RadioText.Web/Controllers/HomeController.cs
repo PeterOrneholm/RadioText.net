@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Storage.Blob;
 using Newtonsoft.Json;
-using Orneholm.NewsSearch.Web.Models;
+using Orneholm.RadioText.Web.Models;
 
-namespace Orneholm.NewsSearch.Web.Controllers
+namespace Orneholm.RadioText.Web.Controllers
 {
     public class HomeController : Controller
     {

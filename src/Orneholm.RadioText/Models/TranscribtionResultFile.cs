@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Orneholm.NewsSearch.Models
+namespace Orneholm.RadioText.Models
 {
     public class TranscribtionResultFile
     {

@@ -2,7 +2,7 @@
 using System.Net;
 using System.Runtime.Serialization;
 
-namespace Orneholm.NewsSearch.BatchClient
+namespace Orneholm.RadioText.BatchClient
 {
     [Serializable]
     public sealed class FailedHttpClientRequestException : Exception

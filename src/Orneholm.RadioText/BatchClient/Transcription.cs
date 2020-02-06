@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Orneholm.NewsSearch.BatchClient
+namespace Orneholm.RadioText.BatchClient
 {
     public sealed class Transcription
     {

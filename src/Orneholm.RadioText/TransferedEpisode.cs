@@ -1,7 +1,7 @@
 ﻿using System;
 using Orneholm.SverigesRadio.Api.Models.Response.Episodes;
 
-namespace Orneholm.NewsSearch
+namespace Orneholm.RadioText
 {
     public class TransferedEpisode
     {

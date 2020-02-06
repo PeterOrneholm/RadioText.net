@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Azure.CognitiveServices.Language.TextAnalytics.Models;
 
-namespace Orneholm.NewsSearch.Web.Models
+namespace Orneholm.RadioText.Web.Models
 {
     public class SrAnalyzedEpisode
     {

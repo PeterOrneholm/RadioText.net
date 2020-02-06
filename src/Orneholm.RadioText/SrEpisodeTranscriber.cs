@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Orneholm.NewsSearch.BatchClient;
+using Orneholm.RadioText.BatchClient;
 
-namespace Orneholm.NewsSearch
+namespace Orneholm.RadioText
 {
     public class SrEpisodeTranscriber
     {

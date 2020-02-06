@@ -10,9 +10,9 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Rest;
 using Newtonsoft.Json;
-using Orneholm.NewsSearch.Models;
+using Orneholm.RadioText.Models;
 
-namespace Orneholm.NewsSearch
+namespace Orneholm.RadioText
 {
     public class TranscriptionEnricher
     {

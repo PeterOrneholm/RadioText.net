@@ -5,7 +5,7 @@ using Orneholm.SverigesRadio.Api;
 using Orneholm.SverigesRadio.Api.Models.Request.Common;
 using Shared;
 
-namespace Orneholm.NewsSearch
+namespace Orneholm.RadioText
 {
     public class Program
     {

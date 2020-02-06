@@ -5,7 +5,7 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.Storage.Shared.Protocol;
 
-namespace Orneholm.NewsSearch
+namespace Orneholm.RadioText
 {
     public class StorageTransfer
     {

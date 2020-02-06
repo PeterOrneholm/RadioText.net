@@ -8,7 +8,7 @@ using Orneholm.SverigesRadio.Api;
 using Orneholm.SverigesRadio.Api.Models.Request;
 using Orneholm.SverigesRadio.Api.Models.Response.Episodes;
 
-namespace Orneholm.NewsSearch
+namespace Orneholm.RadioText
 {
     public class SrEpisodeTransfer
     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Orneholm.NewsSearch.BatchClient
+namespace Orneholm.RadioText.BatchClient
 {
     public class RootObject
     {

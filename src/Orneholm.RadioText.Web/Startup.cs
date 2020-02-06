@@ -5,9 +5,9 @@ using Microsoft.Azure.Storage.Blob;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Orneholm.NewsSearch.Web.Models;
+using Orneholm.RadioText.Web.Models;
 
-namespace Orneholm.NewsSearch.Web
+namespace Orneholm.RadioText.Web
 {
     public class Startup
     {

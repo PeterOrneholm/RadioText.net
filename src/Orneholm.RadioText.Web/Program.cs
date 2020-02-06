@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace Orneholm.NewsSearch.Web
+namespace Orneholm.RadioText.Web
 {
     public class Program
     {

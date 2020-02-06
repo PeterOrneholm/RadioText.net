@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Orneholm.NewsSearch.BatchClient
+namespace Orneholm.RadioText.BatchClient
 {
     public sealed class ModelIdentity
     {
