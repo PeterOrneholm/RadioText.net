@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <NeutralLanguage>en</NeutralLanguage>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+        <Description>Making news from Swedish Radio searchable!</Description>
+
+        <Authors>Peter Örneholm</Authors>
+        <Company>Orneholm AB</Company>
+        <Copyright>Copyright © Peter Örneholm</Copyright>
+
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/PeterOrneholm/RadioText.net.git</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/PeterOrneholm/RadioText.net</PackageProjectUrl>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="System.Text.Json" Version="4.7.0" />
+    </ItemGroup>
+
+</Project>
