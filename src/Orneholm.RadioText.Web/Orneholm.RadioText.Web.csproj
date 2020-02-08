@@ -5,7 +5,7 @@
         <UserSecretsId>ab287f92-a865-4ded-8c43-21df9aabc7dc</UserSecretsId>
 
         <LangVersion>latest</LangVersion>
-        <Nullable>enable</Nullable>
+        <!--<Nullable>enable</Nullable>-->
         <NeutralLanguage>en</NeutralLanguage>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 

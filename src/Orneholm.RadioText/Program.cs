@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Orneholm.SverigesRadio.Api;
@@ -53,8 +53,8 @@ namespace Orneholm.RadioText
             Console.WriteLine("");
             Console.WriteLine("Enriching transcriptions...");
 
-            var transcriptionEnricher = new TranscriptionEnricher(StorageConnectionString, StorageMediaTranscriptionsContainerName, StorageMediaEpisodesContainerName, TextAnalyticsKey, TextAnalyticsEndpoint);
-            await transcriptionEnricher.Enrich();
+            //var transcriptionEnricher = new TranscriptionEnricher(StorageConnectionString, StorageMediaTranscriptionsContainerName, StorageMediaEpisodesContainerName, TextAnalyticsKey, TextAnalyticsEndpoint);
+            //await transcriptionEnricher.Enrich();
 
             Console.WriteLine("");
             Console.WriteLine("");

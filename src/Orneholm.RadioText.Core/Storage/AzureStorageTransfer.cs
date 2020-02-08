@@ -87,7 +87,7 @@ namespace Orneholm.RadioText.Core.Storage
             return container.GetSharedAccessSignature(new SharedAccessBlobPolicy
             {
                 SharedAccessStartTime = DateTime.UtcNow.AddHours(-3),
-                SharedAccessExpiryTime = DateTime.UtcNow.AddHours(24),
+                SharedAccessExpiryTime = DateTime.UtcNow.AddYears(1),
                 Permissions = SharedAccessBlobPermissions.List | SharedAccessBlobPermissions.Read
             }, null);
         }

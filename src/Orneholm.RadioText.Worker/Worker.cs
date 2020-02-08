@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -8,25 +7,22 @@ using Microsoft.Extensions.Logging;
 using Orneholm.RadioText.Core.Storage;
 using Orneholm.RadioText.Core.SverigesRadio;
 using Orneholm.SverigesRadio.Api;
+using Orneholm.SverigesRadio.Api.Models.Response.Episodes;
 
 namespace Orneholm.RadioText.Worker
 {
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
+
+        private readonly SrEpisodesLister _srEpisodesLister;
         private readonly SrEpisodeCollector _srEpisodeCollector;
 
-        private readonly int[] _srProgramIds =
-        {
-            SverigesRadioApiIds.Programs.Ekot,
-            SverigesRadioApiIds.Programs.RadioSweden
-        };
-
-        private readonly int _srProgramIdCount = 20;
-
-        public Worker(ILogger<Worker> logger, SrEpisodeCollector srEpisodeCollector)
+        public Worker(ILogger<Worker> logger, SrEpisodesLister srEpisodesLister, SrEpisodeCollector srEpisodeCollector)
         {
             _logger = logger;
+
+            _srEpisodesLister = srEpisodesLister;
             _srEpisodeCollector = srEpisodeCollector;
         }
 
@@ -34,20 +30,43 @@ namespace Orneholm.RadioText.Worker
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var collectedEpisodes = await CollectEpisodes();
+                var listEpisodes = await ListEpisodes();
+                var tasks = new List<Task>();
 
-                foreach (var collectedEpisode in collectedEpisodes)
+                foreach (var episode in listEpisodes)
                 {
-                    _logger.LogInformation($"Collected: {collectedEpisode.Episode?.Title}");
+                    tasks.Add(Task.Run(async () =>
+                    {
+                        var collectedEpisode = await CollectEpisode(episode.Id);
+                        if (collectedEpisode != null)
+                        {
+                            _logger.LogInformation($"Collected: {collectedEpisode.Episode?.Title}");
+                        }
+                    }));
                 }
 
-                await Task.Delay(1000, stoppingToken);
+                await Task.WhenAll(tasks);
+
+                await Task.Delay(10000, stoppingToken);
             }
         }
 
-        private async Task<List<SrStoredEpisode>> CollectEpisodes()
+        private async Task<List<Episode>> ListEpisodes()
         {
-            return await _srEpisodeCollector.Collect(_srProgramIds.ToList(), _srProgramIdCount);
+            int[] srProgramIds =
+            {
+                SverigesRadioApiIds.Programs.Ekot,
+                SverigesRadioApiIds.Programs.RadioSweden
+            };
+
+            var srProgramIdCount = 50;
+
+            return await _srEpisodesLister.List(srProgramIds.ToList(), srProgramIdCount);
+        }
+
+        private async Task<SrStoredEpisode?> CollectEpisode(int episodeId)
+        {
+            return await _srEpisodeCollector.Collect(episodeId);
         }
     }
 }

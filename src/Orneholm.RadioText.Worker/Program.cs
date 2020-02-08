@@ -1,4 +1,4 @@
-using Microsoft.Azure.Storage;
+using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -7,6 +7,7 @@ using Orneholm.RadioText.Core.Storage;
 using Orneholm.RadioText.Core.SverigesRadio;
 using Orneholm.SverigesRadio.Api;
 using Orneholm.SverigesRadio.Api.Models.Request.Common;
+using CloudStorageAccount = Microsoft.Azure.Storage.CloudStorageAccount;
 
 namespace Orneholm.RadioText.Worker
 {
@@ -21,11 +22,7 @@ namespace Orneholm.RadioText.Worker
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.AddTransient<ISverigesRadioApiClient>(s => SverigesRadioApiClient.CreateClient(new AudioSettings
-                    {
-                        AudioQuality = AudioQuality.High,
-                        OnDemandAudioTemplateId = SverigesRadioApiIds.OnDemandAudioTemplates.M4A_M3U8
-                    }));
+                    services.AddTransient<ISverigesRadioApiClient>(s => SverigesRadioApiClient.CreateClient());
 
                     services.AddTransient(x =>
                     {
@@ -33,9 +30,20 @@ namespace Orneholm.RadioText.Worker
                         return storageAccount.CreateCloudBlobClient();
                     });
 
+                    services.AddTransient(x =>
+                    {
+                        var storageAccount = Microsoft.Azure.Cosmos.Table.CloudStorageAccount.Parse(hostContext.Configuration["AzureStorage:ConnectionString"]);
+                        return storageAccount.CreateCloudTableClient(new TableClientConfiguration());
+                    });
+
                     services.AddTransient<IStorageTransfer, AzureStorageTransfer>();
-                    services.AddTransient<IStorage, InMemoryStorage>();
-                    services.AddTransient<SrEpisodeCollector>(s => new SrEpisodeCollector(hostContext.Configuration["AzureStorage:AudioContainerName"],
+                    //services.AddTransient<IStorage, InMemoryStorage>();
+                    services.AddTransient<IStorage, AzureTableStorage>(s =>
+                    {
+                        return new AzureTableStorage(s.GetRequiredService<CloudTableClient>(), hostContext.Configuration["AzureStorage:EpisodesTableName"]);
+                    });
+                    services.AddTransient<SrEpisodesLister>();
+                    services.AddTransient(s => new SrEpisodeCollector(hostContext.Configuration["AzureStorage:AudioContainerName"],
                         s.GetRequiredService<IStorageTransfer>(),
                         s.GetRequiredService<ISverigesRadioApiClient>(),
                         s.GetRequiredService<ILogger<SrEpisodeCollector>>(),
