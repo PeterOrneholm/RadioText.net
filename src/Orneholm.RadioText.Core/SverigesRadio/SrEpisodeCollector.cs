@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -38,7 +40,7 @@ namespace Orneholm.RadioText.Core.SverigesRadio
         {
             var episode = await GetSrEpisode(episodeId);
 
-            var fileUrl = SrEpisodeMetadata.GetFileUrl(episode);
+            var fileUrl = GetFileUrl(episode);
             if (fileUrl == null)
             {
                 return null;
@@ -82,7 +84,7 @@ namespace Orneholm.RadioText.Core.SverigesRadio
 
                 AudioBlobIdentifier = name,
                 AudioExtension = extension,
-                AudioLocale = SrEpisodeMetadata.GetAudioLocaleForEpisode(episode)
+                AudioLocale = GetAudioLocaleForEpisode(episode)
             };
         }
 
@@ -116,6 +118,31 @@ namespace Orneholm.RadioText.Core.SverigesRadio
             }
 
             return new Uri(url);
+        }
+
+        private static string ProgramLocaleDefault = "sv-SE";
+        private static readonly Dictionary<int, string> ProgramLocaleMapping = new Dictionary<int, string>
+        {
+            { SverigesRadioApiIds.Programs.RadioSweden, "en-US" }
+        };
+
+        private static string GetAudioLocaleForEpisode(Episode episode)
+        {
+            var programId = episode.Program.Id;
+            if (ProgramLocaleMapping.ContainsKey(programId))
+            {
+                return ProgramLocaleMapping[programId];
+            }
+
+            return ProgramLocaleDefault;
+        }
+
+        private static string? GetFileUrl(Episode episode)
+        {
+            var fileUrl = episode?.DownloadPodfile?.Url;
+            fileUrl ??= episode?.Broadcast?.BroadcastFiles.FirstOrDefault()?.Url;
+
+            return fileUrl;
         }
     }
 }
