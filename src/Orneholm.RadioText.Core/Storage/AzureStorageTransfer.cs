@@ -31,7 +31,7 @@ namespace Orneholm.RadioText.Core.Storage
 
             foreach (var blob in blobs)
             {
-                tasks.Add(TransferBlockBlobIfNotExists(cloudBlobContainer, blob.TargetBlobIdentifier, blob.SourceUrl, blob.TargetBlobMetadata).ContinueWith(
+                tasks.Add(TransferBlockBlobIfNotExists(cloudBlobContainer, blob.TargetBlobIdentifier, blob.SourceUrl).ContinueWith(
                     x =>
                     {
                         uris.AddOrUpdate(blob.TargetBlobIdentifier, x.Result, (s, uri) => uri);
@@ -43,15 +43,15 @@ namespace Orneholm.RadioText.Core.Storage
             return uris.ToDictionary(x => x.Key, x => x.Value);
         }
 
-        public async Task<Uri> TransferBlockBlobIfNotExists(string cloudBlobContainerName, string targetBlobName, string sourceUrl, Dictionary<string, string>? metadata = null)
+        public async Task<Uri> TransferBlockBlobIfNotExists(string cloudBlobContainerName, string targetBlobName, string sourceUrl)
         {
             var cloudBlobContainer = _cloudBlobClient.GetContainerReference(cloudBlobContainerName);
             await cloudBlobContainer.CreateIfNotExistsAsync(BlobContainerPublicAccessType.Blob, new BlobRequestOptions(), new OperationContext());
 
-            return await TransferBlockBlobIfNotExists(cloudBlobContainer, targetBlobName, sourceUrl, metadata);
+            return await TransferBlockBlobIfNotExists(cloudBlobContainer, targetBlobName, sourceUrl);
         }
 
-        public async Task<Uri> TransferBlockBlobIfNotExists(CloudBlobContainer cloudBlobContainer, string targetBlobName, string sourceUrl, Dictionary<string, string>? metadata = null)
+        public async Task<Uri> TransferBlockBlobIfNotExists(CloudBlobContainer cloudBlobContainer, string targetBlobName, string sourceUrl)
         {
             var cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(targetBlobName);
 

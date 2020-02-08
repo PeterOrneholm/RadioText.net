@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Orneholm.RadioText.Core.Storage;
 using Orneholm.RadioText.Core.SverigesRadio;
 using Orneholm.SverigesRadio.Api;
-using Orneholm.SverigesRadio.Api.Models.Request.Common;
 using CloudStorageAccount = Microsoft.Azure.Storage.CloudStorageAccount;
 
 namespace Orneholm.RadioText.Worker
