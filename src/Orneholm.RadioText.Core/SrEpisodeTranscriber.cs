@@ -6,9 +6,8 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Orneholm.RadioText.Azure.SpeechBatchClient;
 using Orneholm.RadioText.Core.Storage;
-using Orneholm.RadioText.Core.SverigesRadio;
 
-namespace Orneholm.RadioText.Core.Transcription
+namespace Orneholm.RadioText.Core
 {
     public class SrEpisodeTranscriber
     {

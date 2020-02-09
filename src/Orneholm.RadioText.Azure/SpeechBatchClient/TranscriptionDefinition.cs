@@ -68,20 +68,4 @@ namespace Orneholm.RadioText.Azure.SpeechBatchClient
             return new TranscriptionDefinition(name, description, locale, recordingsUrl, models);
         }
     }
-
-    public enum PunctuationMode
-    {
-        None,
-        Dictated,
-        Automatic,
-        DictatedAndAutomatic
-    }
-
-    public enum ProfanityFilterMode
-    {
-        None,
-        Removed,
-        Tags,
-        Masked
-    }
 }

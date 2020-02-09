@@ -1,16 +1,13 @@
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Orneholm.SverigesRadio.Api;
 using Orneholm.SverigesRadio.Api.Models.Request;
 using Orneholm.SverigesRadio.Api.Models.Response.Episodes;
 
-namespace Orneholm.RadioText.Core.SverigesRadio
+namespace Orneholm.RadioText.Core
 {
     public class SrEpisodesLister
     {

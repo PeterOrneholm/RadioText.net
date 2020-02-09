@@ -5,9 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Orneholm.RadioText.Core;
 using Orneholm.RadioText.Core.Storage;
-using Orneholm.RadioText.Core.SverigesRadio;
-using Orneholm.RadioText.Core.Transcription;
 using Orneholm.SverigesRadio.Api;
 using Orneholm.SverigesRadio.Api.Models.Response.Episodes;
 

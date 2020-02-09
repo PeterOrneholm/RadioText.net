@@ -11,7 +11,7 @@ using Orneholm.SverigesRadio.Api.Models.Request.Common;
 using Orneholm.SverigesRadio.Api.Models.Request.Episodes;
 using Orneholm.SverigesRadio.Api.Models.Response.Episodes;
 
-namespace Orneholm.RadioText.Core.SverigesRadio
+namespace Orneholm.RadioText.Core
 {
     public class SrEpisodeCollector
     {

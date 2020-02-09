@@ -4,9 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Orneholm.RadioText.Azure.SpeechBatchClient;
+using Orneholm.RadioText.Core;
 using Orneholm.RadioText.Core.Storage;
-using Orneholm.RadioText.Core.SverigesRadio;
-using Orneholm.RadioText.Core.Transcription;
 using Orneholm.SverigesRadio.Api;
 using CloudStorageAccount = Microsoft.Azure.Storage.CloudStorageAccount;
 
