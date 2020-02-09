@@ -47,12 +47,18 @@ namespace Orneholm.RadioText.Azure.SpeechBatchClient
             return GetAsync<Transcription>($"{SpeechToTextBasePath}Transcriptions/{id}");
         }
 
+        public Task<Uri> PostTranscriptionAsync(TranscriptionDefinition transcriptionDefinition)
+        {
+            var path = $"{SpeechToTextBasePath}Transcriptions/";
+            return PostAsJsonAsync(path, transcriptionDefinition);
+        }
+
         public Task<Uri> PostTranscriptionAsync(string name, string description, string locale, Uri recordingsUrl)
         {
             var path = $"{SpeechToTextBasePath}Transcriptions/";
             var transcriptionDefinition = TranscriptionDefinition.Create(name, description, locale, recordingsUrl);
 
-            return this.PostAsJsonAsync<TranscriptionDefinition>(path, transcriptionDefinition);
+            return PostAsJsonAsync(path, transcriptionDefinition);
         }
 
         public Task<Uri> PostTranscriptionAsync(string name, string description, string locale, Uri recordingsUrl, IEnumerable<Guid> modelIds)
@@ -63,11 +69,11 @@ namespace Orneholm.RadioText.Azure.SpeechBatchClient
                 return PostTranscriptionAsync(name, description, locale, recordingsUrl);
             }
 
-            var models = modelIdsList.Select(m => ModelIdentity.Create(m)).ToList();
+            var models = modelIdsList.Select(ModelIdentity.Create).ToList();
             var path = $"{SpeechToTextBasePath}Transcriptions/";
 
             var transcriptionDefinition = TranscriptionDefinition.Create(name, description, locale, recordingsUrl, models);
-            return this.PostAsJsonAsync<TranscriptionDefinition>(path, transcriptionDefinition);
+            return PostAsJsonAsync(path, transcriptionDefinition);
         }
 
         public Task<Transcription> GetTranscriptionAsync(Uri location)
@@ -127,7 +133,10 @@ namespace Orneholm.RadioText.Azure.SpeechBatchClient
                 if (response.IsSuccessStatusCode && string.Equals(contentType.MediaType, "application/json", StringComparison.OrdinalIgnoreCase))
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<TResponse>(content);
+                    var result = JsonSerializer.Deserialize<TResponse>(content, new JsonSerializerOptions()
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
 
                     return result;
                 }

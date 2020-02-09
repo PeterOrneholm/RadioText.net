@@ -90,7 +90,7 @@ namespace Orneholm.RadioText.Core.SverigesRadio
 
         private static string GetBlobName(int programId, Episode episode, string extension)
         {
-            return $"SR/{programId}/SR_{programId}__{episode.PublishDateUtc:yyyy-MM-dd}_{episode.PublishDateUtc:HH-mm}__{episode.Id}.{extension}";
+            return $"SR/programs/{programId}/episodes/{episode.Id}/SR_{programId}__{episode.PublishDateUtc:yyyy-MM-dd}_{episode.PublishDateUtc:HH-mm}__{episode.Id}.{extension}";
         }
 
         private async Task<Episode> GetSrEpisode(int episodeId)

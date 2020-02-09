@@ -12,13 +12,6 @@ namespace Orneholm.RadioText.Azure.SpeechBatchClient
             RecordingsUrl = recordingsUrl;
             Locale = locale;
             Models = models;
-            Properties = new Dictionary<string, string>
-            {
-                {"PunctuationMode", "DictatedAndAutomatic"},
-                {"ProfanityFilterMode", "None"},
-                {"AddWordLevelTimestamps", "True"},
-                {"AddSentiment", "False"}
-            };
         }
 
         public string Name { get; set; }
@@ -26,7 +19,35 @@ namespace Orneholm.RadioText.Azure.SpeechBatchClient
         public Uri RecordingsUrl { get; set; }
         public string Locale { get; set; }
         public IEnumerable<ModelIdentity> Models { get; set; }
-        public IDictionary<string, string> Properties { get; set; }
+
+        public PunctuationMode PunctuationMode { get; set; } = PunctuationMode.DictatedAndAutomatic;
+        public ProfanityFilterMode ProfanityFilterMode { get; set; } = ProfanityFilterMode.None;
+        public bool AddWordLevelTimestamps { get; set; } = true;
+        public bool AddSentiment { get; set; } = false;
+        public bool AddDiarization { get; set; } = false;
+        public string TranscriptionResultsContainerUrl { get; set; } = string.Empty;
+
+        public IDictionary<string, string> Properties
+        {
+            get
+            {
+                var properties = new Dictionary<string, string>
+                {
+                    { "PunctuationMode", PunctuationMode.ToString() },
+                    { "ProfanityFilterMode", ProfanityFilterMode.ToString() },
+                    { "AddWordLevelTimestamps", AddWordLevelTimestamps.ToString() },
+                    { "AddSentiment", AddSentiment.ToString() },
+                    { "AddDiarization", AddDiarization.ToString() }
+                };
+
+                if (!string.IsNullOrWhiteSpace(TranscriptionResultsContainerUrl))
+                {
+                    properties["TranscriptionResultsContainerUrl"] = TranscriptionResultsContainerUrl;
+                }
+
+                return properties;
+            }
+        }
 
         public static TranscriptionDefinition Create(
             string name,
@@ -34,7 +55,7 @@ namespace Orneholm.RadioText.Azure.SpeechBatchClient
             string locale,
             Uri recordingsUrl)
         {
-            return TranscriptionDefinition.Create(name, description, locale, recordingsUrl, new ModelIdentity[0]);
+            return Create(name, description, locale, recordingsUrl, new ModelIdentity[0]);
         }
 
         public static TranscriptionDefinition Create(
@@ -46,5 +67,21 @@ namespace Orneholm.RadioText.Azure.SpeechBatchClient
         {
             return new TranscriptionDefinition(name, description, locale, recordingsUrl, models);
         }
+    }
+
+    public enum PunctuationMode
+    {
+        None,
+        Dictated,
+        Automatic,
+        DictatedAndAutomatic
+    }
+
+    public enum ProfanityFilterMode
+    {
+        None,
+        Removed,
+        Tags,
+        Masked
     }
 }
