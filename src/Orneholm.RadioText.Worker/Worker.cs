@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Orneholm.RadioText.Core;
-using Orneholm.RadioText.Core.Storage;
 using Orneholm.SverigesRadio.Api;
 using Orneholm.SverigesRadio.Api.Models.Response.Episodes;
 
@@ -19,14 +18,16 @@ namespace Orneholm.RadioText.Worker
         private readonly SrEpisodesLister _srEpisodesLister;
         private readonly SrEpisodeCollector _srEpisodeCollector;
         private readonly SrEpisodeTranscriber _srEpisodeTranscriber;
+        private readonly SrEpisodeTextEnricher _srEpisodeTextEnricher;
 
-        public Worker(ILogger<Worker> logger, SrEpisodesLister srEpisodesLister, SrEpisodeCollector srEpisodeCollector, SrEpisodeTranscriber srEpisodeTranscriber)
+        public Worker(ILogger<Worker> logger, SrEpisodesLister srEpisodesLister, SrEpisodeCollector srEpisodeCollector, SrEpisodeTranscriber srEpisodeTranscriber, SrEpisodeTextEnricher srEpisodeTextEnricher)
         {
             _logger = logger;
 
             _srEpisodesLister = srEpisodesLister;
             _srEpisodeCollector = srEpisodeCollector;
             _srEpisodeTranscriber = srEpisodeTranscriber;
+            _srEpisodeTextEnricher = srEpisodeTextEnricher;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -44,6 +45,7 @@ namespace Orneholm.RadioText.Worker
                     {
                         await CollectEpisode(episode.Id);
                         await TranscribeEpisode(episode.Id);
+                        await EnrichTextForEpisode(episode.Id);
                     }, stoppingToken).ContinueWith(task =>
                     {
                         if (task.Exception != null)
@@ -72,14 +74,19 @@ namespace Orneholm.RadioText.Worker
             return await _srEpisodesLister.List(srProgramIds.ToList(), srProgramIdCount);
         }
 
-        private async Task<SrStoredEpisode?> CollectEpisode(int episodeId)
+        private async Task CollectEpisode(int episodeId)
         {
-            return await _srEpisodeCollector.Collect(episodeId);
+            await _srEpisodeCollector.Collect(episodeId);
         }
 
         private async Task TranscribeEpisode(int episodeId)
         {
             await _srEpisodeTranscriber.TranscribeAndPersist(episodeId);
+        }
+
+        private async Task EnrichTextForEpisode(int episodeId)
+        {
+            await _srEpisodeTextEnricher.Enrich(episodeId);
         }
     }
 }

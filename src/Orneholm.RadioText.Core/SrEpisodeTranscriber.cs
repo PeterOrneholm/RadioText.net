@@ -124,7 +124,7 @@ namespace Orneholm.RadioText.Core
                         _logger.LogError($"Error transcribing {storedEpisode.Episode.Id}");
                         return null;
                     case "Succeeded":
-                        _logger.LogError($"Transcribed {storedEpisode.Episode.Id}");
+                        _logger.LogInformation($"Transcribed {storedEpisode.Episode.Id}");
                         return transcription;
                     case "NotStarted":
                     case "Running":

@@ -24,6 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.Azure.CognitiveServices.Language.TextAnalytics" Version="4.0.0" />
         <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.6" />
         <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="11.1.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.1" />

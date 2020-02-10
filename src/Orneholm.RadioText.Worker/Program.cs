@@ -1,8 +1,14 @@
+using System;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Azure.CognitiveServices.Language.TextAnalytics;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Rest;
 using Orneholm.RadioText.Azure.SpeechBatchClient;
 using Orneholm.RadioText.Core;
 using Orneholm.RadioText.Core.Storage;
@@ -38,6 +44,15 @@ namespace Orneholm.RadioText.Worker
 
                     services.AddTransient(x => SpeechBatchClient.CreateApiV2Client(hostContext.Configuration["AzureSpeech:Key"], hostContext.Configuration["AzureSpeech:Hostname"], 443));
 
+                    services.AddTransient(x =>
+                    {
+                        var credentials = new ApiKeyServiceClientCredentials(hostContext.Configuration["AzureTextAnalytics:Key"]);
+                        return new TextAnalyticsClient(credentials)
+                        {
+                            Endpoint = hostContext.Configuration["AzureTextAnalytics:Endpoint"]
+                        };
+                    });
+
                     services.AddTransient<IStorageTransfer, AzureStorageTransfer>();
                     services.AddTransient<IStorage, AzureTableStorage>(s => new AzureTableStorage(
                         s.GetRequiredService<CloudTableClient>(),
@@ -63,7 +78,30 @@ namespace Orneholm.RadioText.Worker
                         s.GetRequiredService<CloudBlobClient>()
                     ));
 
+                    services.AddTransient<SrEpisodeTextEnricher>();
+
                     services.AddHostedService<Worker>();
                 });
+
+
+        private class ApiKeyServiceClientCredentials : ServiceClientCredentials
+        {
+            private readonly string apiKey;
+
+            public ApiKeyServiceClientCredentials(string apiKey)
+            {
+                this.apiKey = apiKey;
+            }
+
+            public override Task ProcessHttpRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                if (request == null)
+                {
+                    throw new ArgumentNullException("request");
+                }
+                request.Headers.Add("Ocp-Apim-Subscription-Key", this.apiKey);
+                return base.ProcessHttpRequestAsync(request, cancellationToken);
+            }
+        }
     }
 }
