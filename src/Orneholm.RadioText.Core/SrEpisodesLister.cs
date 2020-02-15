@@ -21,21 +21,21 @@ namespace Orneholm.RadioText.Core
         }
 
 
-        public async Task<List<Episode>> List(List<int> programIds, int count)
+        public async Task<List<Episode>> List(Dictionary<int, int> programIdsAndCount)
         {
             var episodes = new ConcurrentBag<Episode>();
             var tasks = new List<Task>();
 
-            foreach (var programId in programIds)
+            foreach (var program in programIdsAndCount)
             {
-                _logger.LogInformation($"Listing episodes for program {programId}");
-                tasks.Add(List(programId, count).ContinueWith(x =>
+                _logger.LogInformation($"Listing episodes for program {program.Key}");
+                tasks.Add(List(program.Key, program.Value).ContinueWith(x =>
                 {
                     foreach (var episode in x.Result)
                     {
                         episodes.Add(episode);
                     }
-                    _logger.LogInformation($"Listed {x.Result.Count} episodes for program {programId}");
+                    _logger.LogInformation($"Listed {x.Result.Count} episodes for program {program.Key}");
                 }));
             }
 

@@ -19,8 +19,9 @@ namespace Orneholm.RadioText.Worker
         private readonly SrEpisodeCollector _srEpisodeCollector;
         private readonly SrEpisodeTranscriber _srEpisodeTranscriber;
         private readonly SrEpisodeTextEnricher _srEpisodeTextEnricher;
+        private readonly SrEpisodeSummarizer _srEpisodeSummarizer;
 
-        public Worker(ILogger<Worker> logger, SrEpisodesLister srEpisodesLister, SrEpisodeCollector srEpisodeCollector, SrEpisodeTranscriber srEpisodeTranscriber, SrEpisodeTextEnricher srEpisodeTextEnricher)
+        public Worker(ILogger<Worker> logger, SrEpisodesLister srEpisodesLister, SrEpisodeCollector srEpisodeCollector, SrEpisodeTranscriber srEpisodeTranscriber, SrEpisodeTextEnricher srEpisodeTextEnricher, SrEpisodeSummarizer srEpisodeSummarizer)
         {
             _logger = logger;
 
@@ -28,6 +29,7 @@ namespace Orneholm.RadioText.Worker
             _srEpisodeCollector = srEpisodeCollector;
             _srEpisodeTranscriber = srEpisodeTranscriber;
             _srEpisodeTextEnricher = srEpisodeTextEnricher;
+            _srEpisodeSummarizer = srEpisodeSummarizer;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -46,6 +48,7 @@ namespace Orneholm.RadioText.Worker
                         await CollectEpisode(episode.Id);
                         await TranscribeEpisode(episode.Id);
                         await EnrichTextForEpisode(episode.Id);
+                        await SummarizeEpisode(episode.Id);
                     }, stoppingToken).ContinueWith(task =>
                     {
                         if (task.Exception != null)
@@ -63,15 +66,13 @@ namespace Orneholm.RadioText.Worker
 
         private async Task<List<Episode>> ListEpisodes()
         {
-            int[] srProgramIds =
+            var srPrograms = new Dictionary<int, int>
             {
-                //SverigesRadioApiIds.Programs.Ekot,
-                SverigesRadioApiIds.Programs.RadioSweden
+                { SverigesRadioApiIds.Programs.Ekot, 1 },
+                { SverigesRadioApiIds.Programs.RadioSweden, 1 }
             };
 
-            var srProgramIdCount = 1;
-
-            return await _srEpisodesLister.List(srProgramIds.ToList(), srProgramIdCount);
+            return await _srEpisodesLister.List(srPrograms);
         }
 
         private async Task CollectEpisode(int episodeId)
@@ -87,6 +88,11 @@ namespace Orneholm.RadioText.Worker
         private async Task EnrichTextForEpisode(int episodeId)
         {
             await _srEpisodeTextEnricher.Enrich(episodeId);
+        }
+
+        private async Task SummarizeEpisode(int episodeId)
+        {
+            await _srEpisodeSummarizer.Summarize(episodeId);
         }
     }
 }

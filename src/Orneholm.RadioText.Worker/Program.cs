@@ -57,7 +57,9 @@ namespace Orneholm.RadioText.Worker
                     services.AddTransient<IStorage, AzureTableStorage>(s => new AzureTableStorage(
                         s.GetRequiredService<CloudTableClient>(),
                         hostContext.Configuration["AzureStorage:EpisodesTableName"],
-                        hostContext.Configuration["AzureStorage:EpisodeTranscriptionsTableName"]
+                        hostContext.Configuration["AzureStorage:EpisodeTranscriptionsTableName"],
+                        hostContext.Configuration["AzureStorage:EpisodeTextAnalyticsTableName"],
+                        hostContext.Configuration["AzureStorage:EpisodeSummaryTableName"]
                     ));
 
                     services.AddTransient<SrEpisodesLister>();
@@ -79,6 +81,7 @@ namespace Orneholm.RadioText.Worker
                     ));
 
                     services.AddTransient<SrEpisodeTextEnricher>();
+                    services.AddTransient<SrEpisodeSummarizer>();
 
                     services.AddHostedService<Worker>();
                 });

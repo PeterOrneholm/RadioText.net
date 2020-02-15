@@ -14,7 +14,7 @@ namespace Orneholm.RadioText.Core
         private const string StatusTranscribing = "Transcribing";
         private const string StatusTranscribed = "Transcribed";
 
-        private static readonly TimeSpan WaitBetweenStatusCheck = TimeSpan.FromSeconds(5);
+        private static readonly TimeSpan WaitBetweenStatusCheck = TimeSpan.FromSeconds(15);
 
         private readonly string _transcriptionsContainerName;
         private readonly IStorageTransfer _storageTransfer;
@@ -112,7 +112,7 @@ namespace Orneholm.RadioText.Core
             return new Guid(transcriptionLocation.ToString().Split('/').LastOrDefault() ?? string.Empty);
         }
 
-        private async Task<Azure.SpeechBatchClient.Transcription?> WaitForTranscription(Guid transcriptionId, SrStoredEpisode storedEpisode)
+        private async Task<Transcription?> WaitForTranscription(Guid transcriptionId, SrStoredEpisode storedEpisode)
         {
             while (true)
             {

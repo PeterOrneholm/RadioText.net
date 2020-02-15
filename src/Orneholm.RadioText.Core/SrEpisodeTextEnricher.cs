@@ -39,6 +39,13 @@ namespace Orneholm.RadioText.Core
                 return;
             }
 
+            var enrichedEpisode = await _storage.GetEnrichedEpisode(episodeId);
+            if (enrichedEpisode != null)
+            {
+                _logger.LogInformation($"Episode {episodeId} already enriched...");
+                return;
+            }
+
             await Enrich(episodeId, storedEpisode, storedEpisodeTranscription);
         }
 
@@ -50,10 +57,30 @@ namespace Orneholm.RadioText.Core
             var descriptionAnalytics = await Analyze(storedEpisode.Episode.Description);
             var transcriptionAnalytics = await Analyze(storedEpisodeTranscription.CombinedDisplayResult);
 
+            var storedEnrichedEpisode = new SrStoredEnrichedEpisode
+            {
+                OriginalLocale = storedEpisode.AudioLocale
+            };
+
+            if (storedEpisode.AudioLocale == "sv-SE")
+            {
+                storedEnrichedEpisode.Title_SV = titleAnalytics;
+                storedEnrichedEpisode.Description_SV = descriptionAnalytics;
+                storedEnrichedEpisode.Transcription_SV = transcriptionAnalytics;
+            }
+            else if (storedEpisode.AudioLocale == "en-US")
+            {
+                storedEnrichedEpisode.Title_EN = titleAnalytics;
+                storedEnrichedEpisode.Description_EN = descriptionAnalytics;
+                storedEnrichedEpisode.Transcription_EN = transcriptionAnalytics;
+            }
+
+            await _storage.StoreEnrichedEpisode(episodeId, storedEnrichedEpisode);
+
             _logger.LogInformation($"Enriched episode {episodeId}...");
         }
 
-        private async Task<TextAnalyticsResult> Analyze(string text)
+        private async Task<EnrichedText> Analyze(string text)
         {
             var limitedText = GetMaxLengthTextForAnalytics(text);
 
@@ -61,8 +88,9 @@ namespace Orneholm.RadioText.Core
             var sentiment = await _textAnalyticsClient.SentimentAsync(limitedText);
             var entities = await _textAnalyticsClient.EntitiesAsync(limitedText);
 
-            return new TextAnalyticsResult
+            return new EnrichedText
             {
+                Text = text,
                 KeyPhrases = keyPhrases.KeyPhrases?.ToList() ?? new List<string>(),
                 Entities = entities.Entities?.ToList() ?? new List<EntityRecord>(),
                 Sentiment = sentiment.Score
@@ -77,13 +105,6 @@ namespace Orneholm.RadioText.Core
             }
 
             return text.Substring(0, 5120);
-        }
-
-        private class TextAnalyticsResult
-        {
-            public List<string> KeyPhrases { get; set; } = new List<string>();
-            public List<EntityRecord> Entities { get; set; } = new List<EntityRecord>();
-            public double? Sentiment { get; set; }
         }
     }
 }

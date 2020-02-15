@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 
 namespace Orneholm.RadioText.Core.Storage
@@ -10,5 +9,11 @@ namespace Orneholm.RadioText.Core.Storage
 
         Task<SrStoredEpisodeTranscription?> GetEpisodeTranscription(int episodeId);
         Task StoreTranscription(int episodeId, SrStoredEpisodeTranscription episode);
+
+        Task<SrStoredEnrichedEpisode?> GetEnrichedEpisode(int episodeId);
+        Task StoreEnrichedEpisode(int episodeId, SrStoredEnrichedEpisode episode);
+
+        Task<SrStoredSummarizedEpisode?> GetSummarizedEpisode(int episodeId);
+        Task StoreSummarizedEpisode(int episodeId, SrStoredSummarizedEpisode episode);
     }
 }
