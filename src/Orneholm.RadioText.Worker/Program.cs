@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.CognitiveServices.Language.TextAnalytics;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Blob;
+using Microsoft.CognitiveServices.Speech;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -43,6 +44,7 @@ namespace Orneholm.RadioText.Worker
                         return storageAccount.CreateCloudTableClient(new TableClientConfiguration());
                     });
 
+                    services.AddTransient(x => SpeechConfig.FromSubscription(hostContext.Configuration["AzureSpeech:Key"], hostContext.Configuration["AzureSpeech:Region"]));
                     services.AddTransient(x => SpeechBatchClient.CreateApiV2Client(hostContext.Configuration["AzureSpeech:Key"], hostContext.Configuration["AzureSpeech:Hostname"], 443));
 
                     services.AddTransient(x =>
@@ -62,7 +64,8 @@ namespace Orneholm.RadioText.Worker
                         hostContext.Configuration["AzureStorage:EpisodesTableName"],
                         hostContext.Configuration["AzureStorage:EpisodeTranscriptionsTableName"],
                         hostContext.Configuration["AzureStorage:EpisodeTextAnalyticsTableName"],
-                        hostContext.Configuration["AzureStorage:EpisodeSummaryTableName"]
+                        hostContext.Configuration["AzureStorage:EpisodeSummaryTableName"],
+                        hostContext.Configuration["AzureStorage:EpisodeSpeechTableName"]
                     ));
 
                     services.AddTransient<SrEpisodesLister>();
@@ -85,6 +88,13 @@ namespace Orneholm.RadioText.Worker
 
                     services.AddTransient<SrEpisodeTextEnricher>();
                     services.AddTransient<SrEpisodeSummarizer>();
+                    services.AddTransient(s => new SrEpisodeSpeaker(
+                        hostContext.Configuration["AzureStorage:EpisodeSpeechContainerName"],
+                        s.GetRequiredService<SpeechConfig>(),
+                        s.GetRequiredService<IStorage>(),
+                        s.GetRequiredService<ILogger<SrEpisodeSpeaker>>(),
+                        s.GetRequiredService<CloudBlobClient>()
+                    ));
 
                     services.AddHostedService<Worker>();
                 });

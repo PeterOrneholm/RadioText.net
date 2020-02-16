@@ -1,8 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure.CognitiveServices.Language.TextAnalytics;
-using Microsoft.Azure.CognitiveServices.Language.TextAnalytics.Models;
 using Microsoft.Extensions.Logging;
 using Orneholm.RadioText.Core.Storage;
 
@@ -43,6 +39,13 @@ namespace Orneholm.RadioText.Core
                 return;
             }
 
+            var speechEpisode = await _storage.GetEpisodeSpeech(episodeId);
+            if (speechEpisode == null)
+            {
+                _logger.LogInformation($"Episode {episodeId} isn't speeched...");
+                return;
+            }
+
             var summarizedEpisode = await _storage.GetSummarizedEpisode(episodeId);
             if (summarizedEpisode != null)
             {
@@ -50,10 +53,10 @@ namespace Orneholm.RadioText.Core
                 return;
             }
 
-            await Summarize(episodeId, storedEpisode, storedEpisodeTranscription, enrichedEpisode);
+            await Summarize(episodeId, storedEpisode, storedEpisodeTranscription, enrichedEpisode, speechEpisode);
         }
 
-        private async Task Summarize(int episodeId, SrStoredEpisode storedEpisode, SrStoredEpisodeTranscription storedEpisodeTranscription, SrStoredEnrichedEpisode storedEnrichedEpisode)
+        private async Task Summarize(int episodeId, SrStoredEpisode storedEpisode, SrStoredEpisodeTranscription storedEpisodeTranscription, SrStoredEnrichedEpisode storedEnrichedEpisode, SrStoredEpisodeSpeech episodeSpeech)
         {
             _logger.LogInformation($"Summarizing episode {episodeId}...");
 
@@ -83,10 +86,12 @@ namespace Orneholm.RadioText.Core
                 Title_EN = storedEnrichedEpisode.Title_EN,
                 Description_EN = storedEnrichedEpisode.Description_EN,
                 Transcription_EN = storedEnrichedEpisode.Transcription_EN,
+                SpeechUrl_EN = episodeSpeech.SpeechUrl_EN,
 
                 Title_SV = storedEnrichedEpisode.Title_SV,
                 Description_SV = storedEnrichedEpisode.Description_SV,
-                Transcription_SV = storedEnrichedEpisode.Transcription_SV
+                Transcription_SV = storedEnrichedEpisode.Transcription_SV,
+                SpeechUrl_SV = episodeSpeech.SpeechUrl_SV
             };
 
             await _storage.StoreSummarizedEpisode(episodeId, summarizedEpisode);

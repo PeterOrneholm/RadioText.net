@@ -31,9 +31,11 @@ namespace Orneholm.RadioText.Core.Storage
         public EnrichedText? Title_EN { get; set; }
         public EnrichedText? Description_EN { get; set; }
         public EnrichedText? Transcription_EN { get; set; }
+        public string SpeechUrl_EN { get; set; } = string.Empty;
 
         public EnrichedText? Title_SV { get; set; }
         public EnrichedText? Description_SV { get; set; }
         public EnrichedText? Transcription_SV { get; set; }
+        public string SpeechUrl_SV { get; set; } = string.Empty;
     }
 }

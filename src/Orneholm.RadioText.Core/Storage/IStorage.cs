@@ -15,5 +15,8 @@ namespace Orneholm.RadioText.Core.Storage
 
         Task<SrStoredSummarizedEpisode?> GetSummarizedEpisode(int episodeId);
         Task StoreSummarizedEpisode(int episodeId, SrStoredSummarizedEpisode episode);
+
+        Task<SrStoredEpisodeSpeech?> GetEpisodeSpeech(int episodeId);
+        Task StoreEpisodeSpeech(int episodeId, SrStoredEpisodeSpeech episode);
     }
 }

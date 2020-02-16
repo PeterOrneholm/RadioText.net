@@ -12,13 +12,15 @@ namespace Orneholm.RadioText.Core.Storage
         private readonly CloudTable _episodeTranscriptionsTable;
         private readonly CloudTable _episodeEnrichedTable;
         private readonly CloudTable _episodeSummarizedTable;
+        private readonly CloudTable _episodeSpeechTable;
 
-        public AzureTableStorage(CloudTableClient cloudTableClient, string episodesTableName, string episodeTranscriptionsTableName, string episodeEnrichedTableName, string episodeSummarizedTableName)
+        public AzureTableStorage(CloudTableClient cloudTableClient, string episodesTableName, string episodeTranscriptionsTableName, string episodeEnrichedTableName, string episodeSummarizedTableName, string episodeSpeechTableName)
         {
             _episodesTable = cloudTableClient.GetTableReference(episodesTableName);
             _episodeTranscriptionsTable = cloudTableClient.GetTableReference(episodeTranscriptionsTableName);
             _episodeEnrichedTable = cloudTableClient.GetTableReference(episodeEnrichedTableName);
             _episodeSummarizedTable = cloudTableClient.GetTableReference(episodeSummarizedTableName);
+            _episodeSpeechTable = cloudTableClient.GetTableReference(episodeSpeechTableName);
         }
 
         public async Task<SrStoredEpisode?> GetEpisode(int episodeId)
@@ -172,10 +174,12 @@ namespace Orneholm.RadioText.Core.Storage
                 Title_EN = srStoredSummarizedEpisodeEntity.Title_EN,
                 Description_EN = srStoredSummarizedEpisodeEntity.Description_EN,
                 Transcription_EN = srStoredSummarizedEpisodeEntity.Transcription_EN,
+                SpeechUrl_EN = srStoredSummarizedEpisodeEntity.SpeechUrl_EN,
 
                 Title_SV = srStoredSummarizedEpisodeEntity.Title_SV,
                 Description_SV = srStoredSummarizedEpisodeEntity.Description_SV,
-                Transcription_SV = srStoredSummarizedEpisodeEntity.Transcription_SV
+                Transcription_SV = srStoredSummarizedEpisodeEntity.Transcription_SV,
+                SpeechUrl_SV = srStoredSummarizedEpisodeEntity.SpeechUrl_SV
             };
         }
 
@@ -186,6 +190,40 @@ namespace Orneholm.RadioText.Core.Storage
             var entity = new SrStoredSummarizedEpisodeEntity(episodeId, episode);
             var insertOrMergeOperation = TableOperation.InsertOrMerge(entity);
             await _episodeSummarizedTable.ExecuteAsync(insertOrMergeOperation);
+        }
+
+        public async Task<SrStoredEpisodeSpeech?> GetEpisodeSpeech(int episodeId)
+        {
+            await _episodeSpeechTable.CreateIfNotExistsAsync();
+
+            var retrieveOperation = TableOperation.Retrieve<SrStoredEpisodeSpeechEntity>("SrStoredEpisodeSpeech", episodeId.ToString("D"));
+            var result = await _episodeSpeechTable.ExecuteAsync(retrieveOperation);
+            var srStoredEpisodeSpeechEntity = result.Result as SrStoredEpisodeSpeechEntity;
+
+            if (srStoredEpisodeSpeechEntity == null)
+            {
+                return null;
+            }
+
+            return new SrStoredEpisodeSpeech
+            {
+                EpisodeId = srStoredEpisodeSpeechEntity.EpisodeId,
+
+                SpeechBlobIdenitifier_SV = srStoredEpisodeSpeechEntity.SpeechBlobIdenitifier_SV,
+                SpeechUrl_SV = srStoredEpisodeSpeechEntity.SpeechUrl_SV,
+
+                SpeechBlobIdenitifier_EN = srStoredEpisodeSpeechEntity.SpeechBlobIdenitifier_EN,
+                SpeechUrl_EN = srStoredEpisodeSpeechEntity.SpeechUrl_EN
+            };
+        }
+
+        public async Task StoreEpisodeSpeech(int episodeId, SrStoredEpisodeSpeech episode)
+        {
+            await _episodeSpeechTable.CreateIfNotExistsAsync();
+
+            var entity = new SrStoredEpisodeSpeechEntity(episodeId, episode);
+            var insertOrMergeOperation = TableOperation.InsertOrMerge(entity);
+            await _episodeSpeechTable.ExecuteAsync(insertOrMergeOperation);
         }
 
 
@@ -409,10 +447,12 @@ namespace Orneholm.RadioText.Core.Storage
                 Title_EN = episode.Title_EN;
                 Description_EN = episode.Description_EN;
                 Transcription_EN = episode.Transcription_EN;
+                SpeechUrl_EN = episode.SpeechUrl_EN;
 
                 Title_SV = episode.Title_SV;
                 Description_SV = episode.Description_SV;
                 Transcription_SV = episode.Transcription_SV;
+                SpeechUrl_SV = episode.SpeechUrl_SV;
             }
 
             public int EpisodeId { get; set; }
@@ -482,6 +522,8 @@ namespace Orneholm.RadioText.Core.Storage
             }
             public string Transcription_EN_Json { get; set; } = string.Empty;
 
+            public string SpeechUrl_EN { get; set; } = string.Empty;
+
 
             [IgnoreProperty]
             public EnrichedText? Title_SV
@@ -506,6 +548,37 @@ namespace Orneholm.RadioText.Core.Storage
                 set => Transcription_SV_Json = JsonSerializer.Serialize(value);
             }
             public string Transcription_SV_Json { get; set; } = string.Empty;
+
+            public string SpeechUrl_SV { get; set; } = string.Empty;
+        }
+
+        public class SrStoredEpisodeSpeechEntity : TableEntity
+        {
+            public SrStoredEpisodeSpeechEntity()
+            {
+            }
+
+            public SrStoredEpisodeSpeechEntity(int episodeId, SrStoredEpisodeSpeech episode)
+            {
+                PartitionKey = "SrStoredEpisodeSpeech";
+                RowKey = episodeId.ToString("D");
+
+                EpisodeId = episodeId;
+
+                SpeechBlobIdenitifier_SV = episode.SpeechBlobIdenitifier_SV;
+                SpeechUrl_SV = episode.SpeechUrl_SV;
+
+                SpeechBlobIdenitifier_EN = episode.SpeechBlobIdenitifier_EN;
+                SpeechUrl_EN = episode.SpeechUrl_EN;
+            }
+
+            public int EpisodeId { get; set; }
+
+            public string SpeechBlobIdenitifier_SV { get; set; } = string.Empty;
+            public string SpeechUrl_SV { get; set; } = string.Empty;
+
+            public string SpeechBlobIdenitifier_EN { get; set; } = string.Empty;
+            public string SpeechUrl_EN { get; set; } = string.Empty;
         }
     }
 }

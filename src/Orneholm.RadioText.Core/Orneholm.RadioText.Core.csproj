@@ -27,6 +27,7 @@
         <PackageReference Include="Microsoft.Azure.CognitiveServices.Language.TextAnalytics" Version="4.0.0" />
         <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.6" />
         <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="11.1.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.9.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.1" />
         <PackageReference Include="Orneholm.SverigesRadio.Api" Version="1.0.0" />
     </ItemGroup>

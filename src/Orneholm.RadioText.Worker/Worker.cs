@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,8 +21,9 @@ namespace Orneholm.RadioText.Worker
         private readonly SrEpisodeTranscriber _srEpisodeTranscriber;
         private readonly SrEpisodeTextEnricher _srEpisodeTextEnricher;
         private readonly SrEpisodeSummarizer _srEpisodeSummarizer;
+        private readonly SrEpisodeSpeaker _srEpisodeSpeaker;
 
-        public Worker(ILogger<Worker> logger, SrEpisodesLister srEpisodesLister, SrEpisodeCollector srEpisodeCollector, SrEpisodeTranscriber srEpisodeTranscriber, SrEpisodeTextEnricher srEpisodeTextEnricher, SrEpisodeSummarizer srEpisodeSummarizer)
+        public Worker(ILogger<Worker> logger, SrEpisodesLister srEpisodesLister, SrEpisodeCollector srEpisodeCollector, SrEpisodeTranscriber srEpisodeTranscriber, SrEpisodeTextEnricher srEpisodeTextEnricher, SrEpisodeSummarizer srEpisodeSummarizer, SrEpisodeSpeaker srEpisodeSpeaker)
         {
             _logger = logger;
 
@@ -30,6 +32,7 @@ namespace Orneholm.RadioText.Worker
             _srEpisodeTranscriber = srEpisodeTranscriber;
             _srEpisodeTextEnricher = srEpisodeTextEnricher;
             _srEpisodeSummarizer = srEpisodeSummarizer;
+            _srEpisodeSpeaker = srEpisodeSpeaker;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -54,15 +57,22 @@ namespace Orneholm.RadioText.Worker
                         try
                         {
                             _logger.LogInformation($"Working on episode {episodeId}");
+
                             await CollectEpisode(episodeId);
                             await TranscribeEpisode(episodeId);
                             await EnrichTextForEpisode(episodeId);
+                            await SpeakEpisode(episodeId);
                             await SummarizeEpisode(episodeId);
+
                             _logger.LogInformation($"Worked on episode {episodeId}");
                         }
                         catch (Exception e)
                         {
                             _logger.LogError(e, $"Failed working on episode {episodeId}");
+                            if (Debugger.IsAttached)
+                            {
+                                throw;
+                            }
                         }
                     }, stoppingToken).ContinueWith(task =>
                     {
@@ -109,6 +119,11 @@ namespace Orneholm.RadioText.Worker
         private async Task SummarizeEpisode(int episodeId)
         {
             await _srEpisodeSummarizer.Summarize(episodeId);
+        }
+
+        private async Task SpeakEpisode(int episodeId)
+        {
+            await _srEpisodeSpeaker.GenerateSpeak(episodeId);
         }
     }
 }
