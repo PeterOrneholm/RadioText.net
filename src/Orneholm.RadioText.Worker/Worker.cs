@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -69,10 +68,6 @@ namespace Orneholm.RadioText.Worker
                         catch (Exception e)
                         {
                             _logger.LogError(e, $"Failed working on episode {episodeId}");
-                            if (Debugger.IsAttached)
-                            {
-                                throw;
-                            }
                         }
                     }, stoppingToken).ContinueWith(task =>
                     {

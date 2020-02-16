@@ -102,11 +102,11 @@ namespace Orneholm.RadioText.Worker
 
         private class ApiKeyServiceClientCredentials : ServiceClientCredentials
         {
-            private readonly string apiKey;
+            private readonly string _apiKey;
 
             public ApiKeyServiceClientCredentials(string apiKey)
             {
-                this.apiKey = apiKey;
+                this._apiKey = apiKey;
             }
 
             public override Task ProcessHttpRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -115,7 +115,7 @@ namespace Orneholm.RadioText.Worker
                 {
                     throw new ArgumentNullException("request");
                 }
-                request.Headers.Add("Ocp-Apim-Subscription-Key", this.apiKey);
+                request.Headers.Add("Ocp-Apim-Subscription-Key", this._apiKey);
                 return base.ProcessHttpRequestAsync(request, cancellationToken);
             }
         }
