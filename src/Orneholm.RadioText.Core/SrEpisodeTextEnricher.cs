@@ -118,7 +118,11 @@ namespace Orneholm.RadioText.Core
             _logger.LogInformation($"Translating episode {episodeId} from {textLocale} to {targetLocale}...");
 
             var translations = await _translatorClient.Translate(
-                new List<string> { title, description, transcription },
+                new List<string> {
+                    GetMaxLengthTextForTranslation(title),
+                    GetMaxLengthTextForTranslation(description),
+                    GetMaxLengthTextForTranslation(transcription)
+                },
                 new List<string> { targetLocale },
                 textLocale
             );
@@ -161,6 +165,16 @@ namespace Orneholm.RadioText.Core
             }
 
             return text.Substring(0, 5120);
+        }
+
+        private static string GetMaxLengthTextForTranslation(string text)
+        {
+            if (string.IsNullOrEmpty(text) || text.Length <= 4500)
+            {
+                return text;
+            }
+
+            return text.Substring(0, 4500);
         }
 
         private class EpisodeTexts

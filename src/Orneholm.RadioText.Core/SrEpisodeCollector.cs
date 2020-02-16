@@ -76,15 +76,15 @@ namespace Orneholm.RadioText.Core
             }
             var audioFinalUrl = audioFinalUri.ToString();
             var audioExtension = audioFinalUrl.Substring(audioFinalUrl.LastIndexOf('.') + 1);
-            var imageExtension = episode.ImageUrl.Substring(episode.ImageUrl.LastIndexOf('.') + 1);
+            var imageExtension = episode.ImageUrl.Substring(episode.ImageUrl.LastIndexOf('.') + 1).Split('?')[0];
 
             return new SrStoredEpisode
             {
                 Episode = episode,
                 OriginalAudioUrl = audioFinalUrl,
 
-                AudioBlobIdentifier = GetBlobName(episode.Program.Id, episode, audioExtension, "Audio"),
-                ImageBlobIdentifier = GetBlobName(episode.Program.Id, episode, imageExtension, "Thumbnail"),
+                AudioBlobIdentifier = GetBlobName(episode.Program.Id, episode, audioExtension, "OriginalAudio"),
+                ImageBlobIdentifier = GetBlobName(episode.Program.Id, episode, imageExtension, "OriginalThumbnail"),
 
                 AudioExtension = audioExtension,
                 AudioLocale = GetAudioLocaleForEpisode(episode)
