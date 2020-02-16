@@ -58,8 +58,7 @@ namespace Orneholm.RadioText.Core
             var transferAudioBlockBlob = await _storageTransfer.TransferBlockBlobIfNotExists(_cloudBlobContainerName, storedEpisode.AudioBlobIdentifier, storedEpisode.OriginalAudioUrl);
             storedEpisode.AudioUrl = transferAudioBlockBlob.ToString();
 
-            var transferImageBlockBlob = await _storageTransfer.TransferBlockBlobIfNotExists(_cloudBlobContainerName, storedEpisode.AudioBlobIdentifier, storedEpisode.OriginalAudioUrl);
-            storedEpisode.AudioUrl = transferAudioBlockBlob.ToString();
+            await _storageTransfer.TransferBlockBlobIfNotExists(_cloudBlobContainerName, storedEpisode.ImageBlobIdentifier, storedEpisode.OriginalAudioUrl);
 
             await _storage.StoreEpisode(episode.Id, storedEpisode);
 
@@ -77,7 +76,7 @@ namespace Orneholm.RadioText.Core
             }
             var audioFinalUrl = audioFinalUri.ToString();
             var audioExtension = audioFinalUrl.Substring(audioFinalUrl.LastIndexOf('.') + 1);
-            var imageExtension = episode.ImageUrl.Substring(audioFinalUrl.LastIndexOf('.') + 1);
+            var imageExtension = episode.ImageUrl.Substring(episode.ImageUrl.LastIndexOf('.') + 1);
 
             return new SrStoredEpisode
             {
