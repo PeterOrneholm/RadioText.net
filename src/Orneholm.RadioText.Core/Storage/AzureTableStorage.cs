@@ -11,15 +11,13 @@ namespace Orneholm.RadioText.Core.Storage
         private readonly CloudTable _episodesTable;
         private readonly CloudTable _episodeTranscriptionsTable;
         private readonly CloudTable _episodeEnrichedTable;
-        private readonly CloudTable _episodeSummarizedTable;
         private readonly CloudTable _episodeSpeechTable;
 
-        public AzureTableStorage(CloudTableClient cloudTableClient, string episodesTableName, string episodeTranscriptionsTableName, string episodeEnrichedTableName, string episodeSummarizedTableName, string episodeSpeechTableName)
+        public AzureTableStorage(CloudTableClient cloudTableClient, string episodesTableName, string episodeTranscriptionsTableName, string episodeEnrichedTableName, string episodeSpeechTableName)
         {
             _episodesTable = cloudTableClient.GetTableReference(episodesTableName);
             _episodeTranscriptionsTable = cloudTableClient.GetTableReference(episodeTranscriptionsTableName);
             _episodeEnrichedTable = cloudTableClient.GetTableReference(episodeEnrichedTableName);
-            _episodeSummarizedTable = cloudTableClient.GetTableReference(episodeSummarizedTableName);
             _episodeSpeechTable = cloudTableClient.GetTableReference(episodeSpeechTableName);
         }
 
@@ -133,63 +131,6 @@ namespace Orneholm.RadioText.Core.Storage
             var entity = new SrStoredEnrichedEpisodeEntity(episodeId, episode);
             var insertOrMergeOperation = TableOperation.InsertOrMerge(entity);
             await _episodeEnrichedTable.ExecuteAsync(insertOrMergeOperation);
-        }
-
-        public async Task<SrStoredSummarizedEpisode?> GetSummarizedEpisode(int episodeId)
-        {
-            await _episodeSummarizedTable.CreateIfNotExistsAsync();
-
-            var retrieveOperation = TableOperation.Retrieve<SrStoredSummarizedEpisodeEntity>("SrStoredSummarizedEpisode", episodeId.ToString("D"));
-            var result = await _episodeSummarizedTable.ExecuteAsync(retrieveOperation);
-            var srStoredSummarizedEpisodeEntity = result.Result as SrStoredSummarizedEpisodeEntity;
-
-            if (srStoredSummarizedEpisodeEntity == null)
-            {
-                return null;
-            }
-
-            return new SrStoredSummarizedEpisode
-            {
-                EpisodeId = srStoredSummarizedEpisodeEntity.EpisodeId,
-
-                OriginalAudioUrl = srStoredSummarizedEpisodeEntity.OriginalAudioUrl,
-
-                AudioUrl = srStoredSummarizedEpisodeEntity.AudioUrl,
-                AudioLocale = srStoredSummarizedEpisodeEntity.AudioLocale,
-
-                Title = srStoredSummarizedEpisodeEntity.Title,
-                Description = srStoredSummarizedEpisodeEntity.Description,
-                Url = srStoredSummarizedEpisodeEntity.Url,
-                PublishDateUtc = srStoredSummarizedEpisodeEntity.PublishDateUtc,
-                ImageUrl = srStoredSummarizedEpisodeEntity.ImageUrl,
-                ProgramId = srStoredSummarizedEpisodeEntity.ProgramId,
-                ProgramName = srStoredSummarizedEpisodeEntity.ProgramName,
-
-                Transcription = srStoredSummarizedEpisodeEntity.Transcription,
-
-                Title_Original = srStoredSummarizedEpisodeEntity.Title_Original,
-                Description_Original = srStoredSummarizedEpisodeEntity.Description_Original,
-                Transcription_Original = srStoredSummarizedEpisodeEntity.Transcription_Original,
-
-                Title_EN = srStoredSummarizedEpisodeEntity.Title_EN,
-                Description_EN = srStoredSummarizedEpisodeEntity.Description_EN,
-                Transcription_EN = srStoredSummarizedEpisodeEntity.Transcription_EN,
-                SpeechUrl_EN = srStoredSummarizedEpisodeEntity.SpeechUrl_EN,
-
-                Title_SV = srStoredSummarizedEpisodeEntity.Title_SV,
-                Description_SV = srStoredSummarizedEpisodeEntity.Description_SV,
-                Transcription_SV = srStoredSummarizedEpisodeEntity.Transcription_SV,
-                SpeechUrl_SV = srStoredSummarizedEpisodeEntity.SpeechUrl_SV
-            };
-        }
-
-        public async Task StoreSummarizedEpisode(int episodeId, SrStoredSummarizedEpisode episode)
-        {
-            await _episodeSummarizedTable.CreateIfNotExistsAsync();
-
-            var entity = new SrStoredSummarizedEpisodeEntity(episodeId, episode);
-            var insertOrMergeOperation = TableOperation.InsertOrMerge(entity);
-            await _episodeSummarizedTable.ExecuteAsync(insertOrMergeOperation);
         }
 
         public async Task<SrStoredEpisodeSpeech?> GetEpisodeSpeech(int episodeId)
@@ -412,144 +353,6 @@ namespace Orneholm.RadioText.Core.Storage
                 set => Transcription_SV_Json = JsonSerializer.Serialize(value);
             }
             public string Transcription_SV_Json { get; set; } = string.Empty;
-        }
-
-        public class SrStoredSummarizedEpisodeEntity : TableEntity
-        {
-            public SrStoredSummarizedEpisodeEntity()
-            {
-            }
-
-            public SrStoredSummarizedEpisodeEntity(int episodeId, SrStoredSummarizedEpisode episode)
-            {
-                PartitionKey = "SrStoredSummarizedEpisode";
-                RowKey = episodeId.ToString("D");
-
-                EpisodeId = episodeId;
-
-                OriginalAudioUrl = episode.OriginalAudioUrl;
-                AudioUrl = episode.AudioUrl;
-                AudioLocale = episode.AudioLocale;
-
-                Title = episode.Title;
-                Description = episode.Description;
-                Url = episode.Url;
-                PublishDateUtc = episode.PublishDateUtc;
-                ImageUrl = episode.ImageUrl;
-                ProgramId = episode.ProgramId;
-                ProgramName = episode.ProgramName;
-                Transcription = episode.Transcription;
-
-                Title_Original = episode.Title_Original;
-                Description_Original = episode.Description_Original;
-                Transcription_Original = episode.Transcription_Original;
-
-                Title_EN = episode.Title_EN;
-                Description_EN = episode.Description_EN;
-                Transcription_EN = episode.Transcription_EN;
-                SpeechUrl_EN = episode.SpeechUrl_EN;
-
-                Title_SV = episode.Title_SV;
-                Description_SV = episode.Description_SV;
-                Transcription_SV = episode.Transcription_SV;
-                SpeechUrl_SV = episode.SpeechUrl_SV;
-            }
-
-            public int EpisodeId { get; set; }
-
-            public string OriginalAudioUrl { get; set; } = string.Empty;
-
-            public string AudioUrl { get; set; } = string.Empty;
-            public string AudioLocale { get; set; } = string.Empty;
-
-            public string Title { get; set; } = string.Empty;
-            public string Description { get; set; } = string.Empty;
-            public string Url { get; set; } = string.Empty;
-            public DateTime PublishDateUtc { get; set; }
-
-            public string ImageUrl { get; set; } = string.Empty;
-
-            public int ProgramId { get; set; }
-            public string ProgramName { get; set; } = string.Empty;
-
-            public string Transcription { get; set; } = string.Empty;
-
-            [IgnoreProperty]
-            public EnrichedText? Title_Original
-            {
-                get => JsonSerializer.Deserialize<EnrichedText>(Title_Original_Json);
-                set => Title_Original_Json = JsonSerializer.Serialize(value);
-            }
-            public string Title_Original_Json { get; set; } = string.Empty;
-
-            [IgnoreProperty]
-            public EnrichedText? Description_Original
-            {
-                get => JsonSerializer.Deserialize<EnrichedText>(Description_Original_Json);
-                set => Description_Original_Json = JsonSerializer.Serialize(value);
-            }
-            public string Description_Original_Json { get; set; } = string.Empty;
-
-            [IgnoreProperty]
-            public EnrichedText? Transcription_Original
-            {
-                get => JsonSerializer.Deserialize<EnrichedText>(Transcription_Original_Json);
-                set => Transcription_Original_Json = JsonSerializer.Serialize(value);
-            }
-            public string Transcription_Original_Json { get; set; } = string.Empty;
-
-            [IgnoreProperty]
-            public EnrichedText? Title_EN
-            {
-                get => JsonSerializer.Deserialize<EnrichedText>(Title_EN_Json);
-                set => Title_EN_Json = JsonSerializer.Serialize(value);
-            }
-            public string Title_EN_Json { get; set; } = string.Empty;
-
-            [IgnoreProperty]
-            public EnrichedText? Description_EN
-            {
-                get => JsonSerializer.Deserialize<EnrichedText>(Description_EN_Json);
-                set => Description_EN_Json = JsonSerializer.Serialize(value);
-            }
-            public string Description_EN_Json { get; set; } = string.Empty;
-
-            [IgnoreProperty]
-            public EnrichedText? Transcription_EN
-            {
-                get => JsonSerializer.Deserialize<EnrichedText>(Transcription_EN_Json);
-                set => Transcription_EN_Json = JsonSerializer.Serialize(value);
-            }
-            public string Transcription_EN_Json { get; set; } = string.Empty;
-
-            public string SpeechUrl_EN { get; set; } = string.Empty;
-
-
-            [IgnoreProperty]
-            public EnrichedText? Title_SV
-            {
-                get => JsonSerializer.Deserialize<EnrichedText>(Title_SV_Json);
-                set => Title_SV_Json = JsonSerializer.Serialize(value);
-            }
-            public string Title_SV_Json { get; set; } = string.Empty;
-
-            [IgnoreProperty]
-            public EnrichedText? Description_SV
-            {
-                get => JsonSerializer.Deserialize<EnrichedText>(Description_SV_Json);
-                set => Description_SV_Json = JsonSerializer.Serialize(value);
-            }
-            public string Description_SV_Json { get; set; } = string.Empty;
-
-            [IgnoreProperty]
-            public EnrichedText? Transcription_SV
-            {
-                get => JsonSerializer.Deserialize<EnrichedText>(Transcription_SV_Json);
-                set => Transcription_SV_Json = JsonSerializer.Serialize(value);
-            }
-            public string Transcription_SV_Json { get; set; } = string.Empty;
-
-            public string SpeechUrl_SV { get; set; } = string.Empty;
         }
 
         public class SrStoredEpisodeSpeechEntity : TableEntity

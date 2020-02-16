@@ -64,8 +64,12 @@ namespace Orneholm.RadioText.Worker
                         hostContext.Configuration["AzureStorage:EpisodesTableName"],
                         hostContext.Configuration["AzureStorage:EpisodeTranscriptionsTableName"],
                         hostContext.Configuration["AzureStorage:EpisodeTextAnalyticsTableName"],
-                        hostContext.Configuration["AzureStorage:EpisodeSummaryTableName"],
                         hostContext.Configuration["AzureStorage:EpisodeSpeechTableName"]
+                    ));
+
+                    services.AddTransient<ISummaryStorage, SummaryAzureTableStorage>(s => new SummaryAzureTableStorage(
+                        s.GetRequiredService<CloudTableClient>(),
+                        hostContext.Configuration["AzureStorage:EpisodeSummaryTableName"]
                     ));
 
                     services.AddTransient<SrEpisodesLister>();

@@ -7,17 +7,23 @@ namespace Orneholm.RadioText.Core
     public class SrEpisodeSummarizer
     {
         private readonly IStorage _storage;
+        private readonly ISummaryStorage _summaryStorage;
         private readonly ILogger<SrEpisodeSummarizer> _logger;
 
-        public SrEpisodeSummarizer(IStorage storage, ILogger<SrEpisodeSummarizer> logger)
+        public SrEpisodeSummarizer(IStorage storage, ISummaryStorage summaryStorage, ILogger<SrEpisodeSummarizer> logger)
         {
             _storage = storage;
+            _summaryStorage = summaryStorage;
             _logger = logger;
         }
 
 
         public async Task Summarize(int episodeId)
         {
+
+            var episodes = await _summaryStorage.ListSummarizedEpisode();
+
+
             var storedEpisode = await _storage.GetEpisode(episodeId);
             if (storedEpisode == null)
             {
@@ -46,12 +52,13 @@ namespace Orneholm.RadioText.Core
                 return;
             }
 
-            var summarizedEpisode = await _storage.GetSummarizedEpisode(episodeId);
+            var summarizedEpisode = await _summaryStorage.GetSummarizedEpisode(episodeId);
             if (summarizedEpisode != null)
             {
                 _logger.LogInformation($"Episode {episodeId} already summarized...");
                 return;
             }
+
 
             await Summarize(episodeId, storedEpisode, storedEpisodeTranscription, enrichedEpisode, speechEpisode);
         }
@@ -94,7 +101,7 @@ namespace Orneholm.RadioText.Core
                 SpeechUrl_SV = episodeSpeech.SpeechUrl_SV
             };
 
-            await _storage.StoreSummarizedEpisode(episodeId, summarizedEpisode);
+            await _summaryStorage.StoreSummarizedEpisode(episodeId, summarizedEpisode);
 
             _logger.LogInformation($"Summarized episode {episodeId}...");
         }
