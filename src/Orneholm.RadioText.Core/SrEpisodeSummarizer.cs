@@ -43,6 +43,13 @@ namespace Orneholm.RadioText.Core
                 return;
             }
 
+            var summarizedEpisode = await _storage.GetSummarizedEpisode(episodeId);
+            if (summarizedEpisode != null)
+            {
+                _logger.LogInformation($"Episode {episodeId} already summarized...");
+                return;
+            }
+
             await Summarize(episodeId, storedEpisode, storedEpisodeTranscription, enrichedEpisode);
         }
 
@@ -68,6 +75,10 @@ namespace Orneholm.RadioText.Core
                 ProgramName = storedEpisode.Episode.Program.Name,
 
                 Transcription = storedEpisodeTranscription.CombinedDisplayResult,
+
+                Title_Original = storedEnrichedEpisode.Title_Original,
+                Description_Original = storedEnrichedEpisode.Description_Original,
+                Transcription_Original = storedEnrichedEpisode.Transcription_Original,
 
                 Title_EN = storedEnrichedEpisode.Title_EN,
                 Description_EN = storedEnrichedEpisode.Description_EN,

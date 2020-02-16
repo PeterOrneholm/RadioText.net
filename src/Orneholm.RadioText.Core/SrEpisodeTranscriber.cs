@@ -14,7 +14,7 @@ namespace Orneholm.RadioText.Core
         private const string StatusTranscribing = "Transcribing";
         private const string StatusTranscribed = "Transcribed";
 
-        private static readonly TimeSpan WaitBetweenStatusCheck = TimeSpan.FromSeconds(15);
+        private static readonly TimeSpan WaitBetweenStatusCheck = TimeSpan.FromSeconds(10);
 
         private readonly string _transcriptionsContainerName;
         private readonly IStorageTransfer _storageTransfer;
@@ -117,6 +117,9 @@ namespace Orneholm.RadioText.Core
             while (true)
             {
                 var transcription = await _speechBatchClient.GetTranscriptionAsync(transcriptionId);
+
+                _logger.LogInformation($"Transcribing status for {storedEpisode.Episode.Id} is {transcription.Status}");
+
                 switch (transcription.Status)
                 {
                     case "":
@@ -128,7 +131,7 @@ namespace Orneholm.RadioText.Core
                         return transcription;
                     case "NotStarted":
                     case "Running":
-                        continue;
+                        break;
                 }
 
                 await Task.Delay(WaitBetweenStatusCheck);

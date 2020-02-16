@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.CognitiveServices.Language.TextAnalytics;
 using Microsoft.Azure.CognitiveServices.Language.TextAnalytics.Models;
 using Microsoft.Extensions.Logging;
+using Orneholm.RadioText.Azure.TranslatorClient;
 using Orneholm.RadioText.Core.Storage;
 
 namespace Orneholm.RadioText.Core
@@ -12,12 +13,14 @@ namespace Orneholm.RadioText.Core
     public class SrEpisodeTextEnricher
     {
         private readonly TextAnalyticsClient _textAnalyticsClient;
+        private readonly TranslatorClient _translatorClient;
         private readonly IStorage _storage;
         private readonly ILogger<SrEpisodeTextEnricher> _logger;
 
-        public SrEpisodeTextEnricher(TextAnalyticsClient textAnalyticsClient, IStorage storage, ILogger<SrEpisodeTextEnricher> logger)
+        public SrEpisodeTextEnricher(TextAnalyticsClient textAnalyticsClient, TranslatorClient translatorClient, IStorage storage, ILogger<SrEpisodeTextEnricher> logger)
         {
             _textAnalyticsClient = textAnalyticsClient;
+            _translatorClient = translatorClient;
             _storage = storage;
             _logger = logger;
         }
@@ -53,31 +56,84 @@ namespace Orneholm.RadioText.Core
         {
             _logger.LogInformation($"Enriching episode {episodeId}...");
 
-            var titleAnalytics = await Analyze(storedEpisode.Episode.Title);
-            var descriptionAnalytics = await Analyze(storedEpisode.Episode.Description);
-            var transcriptionAnalytics = await Analyze(storedEpisodeTranscription.CombinedDisplayResult);
-
             var storedEnrichedEpisode = new SrStoredEnrichedEpisode
             {
                 OriginalLocale = storedEpisode.AudioLocale
             };
 
-            if (storedEpisode.AudioLocale == "sv-SE")
+            var title = storedEpisode.Episode.Title;
+            var description = storedEpisode.Episode.Description;
+            var transcription = storedEpisodeTranscription.CombinedDisplayResult;
+            var locale = storedEpisode.AudioLocale;
+
+            _logger.LogInformation($"Analyzing episode {episodeId} texts for sv-SE...");
+            var swedishTexts = await AnalyzeTexts(episodeId, title, description, transcription, locale, "sv-SE");
+            storedEnrichedEpisode.Title_SV = swedishTexts.Title;
+            storedEnrichedEpisode.Description_SV = swedishTexts.Description;
+            storedEnrichedEpisode.Transcription_SV = swedishTexts.Transcription;
+
+            _logger.LogInformation($"Analyzing episode {episodeId} texts for en-US...");
+            var englishTexts = await AnalyzeTexts(episodeId, title, description, transcription, locale, "en-US");
+            storedEnrichedEpisode.Title_EN = englishTexts.Title;
+            storedEnrichedEpisode.Description_EN = englishTexts.Description;
+            storedEnrichedEpisode.Transcription_EN = englishTexts.Transcription;
+
+            if (locale == "sv-SE")
             {
-                storedEnrichedEpisode.Title_SV = titleAnalytics;
-                storedEnrichedEpisode.Description_SV = descriptionAnalytics;
-                storedEnrichedEpisode.Transcription_SV = transcriptionAnalytics;
+                storedEnrichedEpisode.Title_Original = storedEnrichedEpisode.Title_SV;
+                storedEnrichedEpisode.Description_Original = storedEnrichedEpisode.Description_SV;
+                storedEnrichedEpisode.Transcription_Original = storedEnrichedEpisode.Transcription_SV;
             }
-            else if (storedEpisode.AudioLocale == "en-US")
+            else if (locale == "en-US")
             {
-                storedEnrichedEpisode.Title_EN = titleAnalytics;
-                storedEnrichedEpisode.Description_EN = descriptionAnalytics;
-                storedEnrichedEpisode.Transcription_EN = transcriptionAnalytics;
+                storedEnrichedEpisode.Title_Original = storedEnrichedEpisode.Title_EN;
+                storedEnrichedEpisode.Description_Original = storedEnrichedEpisode.Description_EN;
+                storedEnrichedEpisode.Transcription_Original = storedEnrichedEpisode.Transcription_EN;
+            }
+            else
+            {
+                var customTexts = await AnalyzeTexts(episodeId, title, description, transcription, locale, locale);
+                storedEnrichedEpisode.Title_Original = customTexts.Title;
+                storedEnrichedEpisode.Description_Original = customTexts.Description;
+                storedEnrichedEpisode.Transcription_Original = customTexts.Transcription;
             }
 
             await _storage.StoreEnrichedEpisode(episodeId, storedEnrichedEpisode);
 
             _logger.LogInformation($"Enriched episode {episodeId}...");
+        }
+
+        private async Task<EpisodeTexts> AnalyzeTexts(int episodeId, string title, string description, string transcription, string textLocale, string targetLocale)
+        {
+            if (textLocale == targetLocale)
+            {
+                return new EpisodeTexts
+                {
+                    Title = await Analyze(title),
+                    Description = await Analyze(description),
+                    Transcription = await Analyze(transcription)
+                };
+            }
+
+            _logger.LogInformation($"Translating episode {episodeId} from {textLocale} to {targetLocale}...");
+
+            var translations = await _translatorClient.Translate(
+                new List<string> { title, description, transcription },
+                new List<string> { targetLocale },
+                textLocale
+            );
+
+            return new EpisodeTexts
+            {
+                Title = await Analyze(GetTranslation(0, translations)),
+                Description = await Analyze(GetTranslation(1, translations)),
+                Transcription = await Analyze(GetTranslation(2, translations))
+            };
+
+            string GetTranslation(int index, List<TranslationResult> t)
+            {
+                return t[index].Translations?.FirstOrDefault()?.Text ?? string.Empty;
+            }
         }
 
         private async Task<EnrichedText> Analyze(string text)
@@ -105,6 +161,13 @@ namespace Orneholm.RadioText.Core
             }
 
             return text.Substring(0, 5120);
+        }
+
+        private class EpisodeTexts
+        {
+            public EnrichedText? Title { get; set; }
+            public EnrichedText? Description { get; set; }
+            public EnrichedText? Transcription { get; set; }
         }
     }
 }

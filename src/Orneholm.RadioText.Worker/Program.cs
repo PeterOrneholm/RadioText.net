@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Rest;
 using Orneholm.RadioText.Azure.SpeechBatchClient;
+using Orneholm.RadioText.Azure.TranslatorClient;
 using Orneholm.RadioText.Core;
 using Orneholm.RadioText.Core.Storage;
 using Orneholm.SverigesRadio.Api;
@@ -52,6 +53,8 @@ namespace Orneholm.RadioText.Worker
                             Endpoint = hostContext.Configuration["AzureTextAnalytics:Endpoint"]
                         };
                     });
+
+                    services.AddTransient(x => TranslatorClient.CreateClient(hostContext.Configuration["AzureTranslator:Key"], hostContext.Configuration["AzureTranslator:Endpoint"]));
 
                     services.AddTransient<IStorageTransfer, AzureStorageTransfer>();
                     services.AddTransient<IStorage, AzureTableStorage>(s => new AzureTableStorage(

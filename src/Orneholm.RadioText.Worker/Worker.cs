@@ -38,17 +38,32 @@ namespace Orneholm.RadioText.Worker
             {
                 await _srEpisodeTranscriber.CleanExistingTranscriptions();
 
-                var listEpisodes = await ListEpisodes();
+                var listEpisode = await ListEpisodes();
+                var listEpisodeIds = listEpisode.Select(x => x.Id).ToList();
+                //listEpisodeIds = new List<int>()
+                //{
+                //    1445938,
+                //    1442349
+                //};
                 var tasks = new List<Task>();
 
-                foreach (var episode in listEpisodes)
+                foreach (var episodeId in listEpisodeIds)
                 {
                     tasks.Add(Task.Run(async () =>
                     {
-                        await CollectEpisode(episode.Id);
-                        await TranscribeEpisode(episode.Id);
-                        await EnrichTextForEpisode(episode.Id);
-                        await SummarizeEpisode(episode.Id);
+                        try
+                        {
+                            _logger.LogInformation($"Working on episode {episodeId}");
+                            await CollectEpisode(episodeId);
+                            await TranscribeEpisode(episodeId);
+                            await EnrichTextForEpisode(episodeId);
+                            await SummarizeEpisode(episodeId);
+                            _logger.LogInformation($"Worked on episode {episodeId}");
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogError(e, $"Failed working on episode {episodeId}");
+                        }
                     }, stoppingToken).ContinueWith(task =>
                     {
                         if (task.Exception != null)
@@ -68,8 +83,9 @@ namespace Orneholm.RadioText.Worker
         {
             var srPrograms = new Dictionary<int, int>
             {
-                { SverigesRadioApiIds.Programs.Ekot, 1 },
-                { SverigesRadioApiIds.Programs.RadioSweden, 1 }
+                { SverigesRadioApiIds.Programs.Ekot, 5 },
+                { SverigesRadioApiIds.Programs.RadioSweden, 10 }, // Radio Sweden - English
+                { 2494, 5 }, // Radio Sweden - Arabic
             };
 
             return await _srEpisodesLister.List(srPrograms);

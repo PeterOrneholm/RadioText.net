@@ -55,8 +55,11 @@ namespace Orneholm.RadioText.Core
             }
 
             storedEpisode = await GetStoredEpisodeModel(fileUrl, episode);
-            var transferBlockBlob = await _storageTransfer.TransferBlockBlobIfNotExists(_cloudBlobContainerName, storedEpisode.AudioBlobIdentifier, storedEpisode.OriginalAudioUrl);
-            storedEpisode.AudioUrl = transferBlockBlob.ToString();
+            var transferAudioBlockBlob = await _storageTransfer.TransferBlockBlobIfNotExists(_cloudBlobContainerName, storedEpisode.AudioBlobIdentifier, storedEpisode.OriginalAudioUrl);
+            storedEpisode.AudioUrl = transferAudioBlockBlob.ToString();
+
+            var transferImageBlockBlob = await _storageTransfer.TransferBlockBlobIfNotExists(_cloudBlobContainerName, storedEpisode.AudioBlobIdentifier, storedEpisode.OriginalAudioUrl);
+            storedEpisode.AudioUrl = transferAudioBlockBlob.ToString();
 
             await _storage.StoreEpisode(episode.Id, storedEpisode);
 
@@ -67,30 +70,31 @@ namespace Orneholm.RadioText.Core
 
         private async Task<SrStoredEpisode> GetStoredEpisodeModel(string fileUrl, Episode episode)
         {
-            var finalUri = await GetUriAfterOneRedirect(fileUrl);
-            if (finalUri.Host == "")
+            var audioFinalUri = await GetUriAfterOneRedirect(fileUrl);
+            if (audioFinalUri.Host == "")
             {
-                finalUri = new Uri((new Uri(fileUrl)).Host + finalUri);
+                audioFinalUri = new Uri((new Uri(fileUrl)).Host + audioFinalUri);
             }
+            var audioFinalUrl = audioFinalUri.ToString();
+            var audioExtension = audioFinalUrl.Substring(audioFinalUrl.LastIndexOf('.') + 1);
+            var imageExtension = episode.ImageUrl.Substring(audioFinalUrl.LastIndexOf('.') + 1);
 
-            var finalUrl = finalUri.ToString();
-            var extension = finalUrl.Substring(finalUrl.LastIndexOf('.') + 1);
-
-            var name = GetBlobName(episode.Program.Id, episode, extension);
             return new SrStoredEpisode
             {
                 Episode = episode,
-                OriginalAudioUrl = finalUrl,
+                OriginalAudioUrl = audioFinalUrl,
 
-                AudioBlobIdentifier = name,
-                AudioExtension = extension,
+                AudioBlobIdentifier = GetBlobName(episode.Program.Id, episode, audioExtension, "Audio"),
+                ImageBlobIdentifier = GetBlobName(episode.Program.Id, episode, imageExtension, "Thumbnail"),
+
+                AudioExtension = audioExtension,
                 AudioLocale = GetAudioLocaleForEpisode(episode)
             };
         }
 
-        private static string GetBlobName(int programId, Episode episode, string extension)
+        private static string GetBlobName(int programId, Episode episode, string extension, string type)
         {
-            return $"SR/programs/{programId}/episodes/{episode.Id}/SR_{programId}__{episode.PublishDateUtc:yyyy-MM-dd}_{episode.PublishDateUtc:HH-mm}__{episode.Id}.{extension}";
+            return $"SR/programs/{programId}/episodes/{episode.Id}/SR_{programId}__{episode.PublishDateUtc:yyyy-MM-dd}_{episode.PublishDateUtc:HH-mm}__{episode.Id}__{type}.{extension}";
         }
 
         private async Task<Episode> GetSrEpisode(int episodeId)
@@ -123,7 +127,8 @@ namespace Orneholm.RadioText.Core
         private static string ProgramLocaleDefault = "sv-SE";
         private static readonly Dictionary<int, string> ProgramLocaleMapping = new Dictionary<int, string>
         {
-            { SverigesRadioApiIds.Programs.RadioSweden, "en-US" }
+            { SverigesRadioApiIds.Programs.RadioSweden, "en-US" }, // Radio Sweden - English
+            { 2494, "ar-EG" } // Radio Sweden - Arabic
         };
 
         private static string GetAudioLocaleForEpisode(Episode episode)

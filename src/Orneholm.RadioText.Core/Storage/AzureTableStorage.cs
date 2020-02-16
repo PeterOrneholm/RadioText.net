@@ -110,6 +110,10 @@ namespace Orneholm.RadioText.Core.Storage
             {
                 EpisodeId = srStoredEnrichedEpisodeEntity.EpisodeId,
 
+                Title_Original = srStoredEnrichedEpisodeEntity.Title_Original,
+                Description_Original = srStoredEnrichedEpisodeEntity.Description_Original,
+                Transcription_Original = srStoredEnrichedEpisodeEntity.Transcription_Original,
+
                 Title_EN = srStoredEnrichedEpisodeEntity.Title_EN,
                 Description_EN = srStoredEnrichedEpisodeEntity.Description_EN,
                 Transcription_EN = srStoredEnrichedEpisodeEntity.Transcription_EN,
@@ -160,6 +164,10 @@ namespace Orneholm.RadioText.Core.Storage
                 ProgramName = srStoredSummarizedEpisodeEntity.ProgramName,
 
                 Transcription = srStoredSummarizedEpisodeEntity.Transcription,
+
+                Title_Original = srStoredSummarizedEpisodeEntity.Title_Original,
+                Description_Original = srStoredSummarizedEpisodeEntity.Description_Original,
+                Transcription_Original = srStoredSummarizedEpisodeEntity.Transcription_Original,
 
                 Title_EN = srStoredSummarizedEpisodeEntity.Title_EN,
                 Description_EN = srStoredSummarizedEpisodeEntity.Description_EN,
@@ -277,6 +285,10 @@ namespace Orneholm.RadioText.Core.Storage
 
                 OriginalLocale = enrichedEpisode.OriginalLocale;
 
+                Title_Original = enrichedEpisode.Title_Original;
+                Description_Original = enrichedEpisode.Description_Original;
+                Transcription_Original = enrichedEpisode.Transcription_Original;
+
                 Title_EN = enrichedEpisode.Title_EN;
                 Description_EN = enrichedEpisode.Description_EN;
                 Transcription_EN = enrichedEpisode.Transcription_EN;
@@ -289,6 +301,30 @@ namespace Orneholm.RadioText.Core.Storage
             public int EpisodeId { get; set; }
 
             public string OriginalLocale { get; set; } = "";
+
+            [IgnoreProperty]
+            public EnrichedText? Title_Original
+            {
+                get => JsonSerializer.Deserialize<EnrichedText>(Title_Original_Json);
+                set => Title_Original_Json = JsonSerializer.Serialize(value);
+            }
+            public string Title_Original_Json { get; set; } = string.Empty;
+
+            [IgnoreProperty]
+            public EnrichedText? Description_Original
+            {
+                get => JsonSerializer.Deserialize<EnrichedText>(Description_Original_Json);
+                set => Description_Original_Json = JsonSerializer.Serialize(value);
+            }
+            public string Description_Original_Json { get; set; } = string.Empty;
+
+            [IgnoreProperty]
+            public EnrichedText? Transcription_Original
+            {
+                get => JsonSerializer.Deserialize<EnrichedText>(Transcription_Original_Json);
+                set => Transcription_Original_Json = JsonSerializer.Serialize(value);
+            }
+            public string Transcription_Original_Json { get; set; } = string.Empty;
 
             [IgnoreProperty]
             public EnrichedText? Title_EN
@@ -366,6 +402,10 @@ namespace Orneholm.RadioText.Core.Storage
                 ProgramName = episode.ProgramName;
                 Transcription = episode.Transcription;
 
+                Title_Original = episode.Title_Original;
+                Description_Original = episode.Description_Original;
+                Transcription_Original = episode.Transcription_Original;
+
                 Title_EN = episode.Title_EN;
                 Description_EN = episode.Description_EN;
                 Transcription_EN = episode.Transcription_EN;
@@ -393,6 +433,30 @@ namespace Orneholm.RadioText.Core.Storage
             public string ProgramName { get; set; } = string.Empty;
 
             public string Transcription { get; set; } = string.Empty;
+
+            [IgnoreProperty]
+            public EnrichedText? Title_Original
+            {
+                get => JsonSerializer.Deserialize<EnrichedText>(Title_Original_Json);
+                set => Title_Original_Json = JsonSerializer.Serialize(value);
+            }
+            public string Title_Original_Json { get; set; } = string.Empty;
+
+            [IgnoreProperty]
+            public EnrichedText? Description_Original
+            {
+                get => JsonSerializer.Deserialize<EnrichedText>(Description_Original_Json);
+                set => Description_Original_Json = JsonSerializer.Serialize(value);
+            }
+            public string Description_Original_Json { get; set; } = string.Empty;
+
+            [IgnoreProperty]
+            public EnrichedText? Transcription_Original
+            {
+                get => JsonSerializer.Deserialize<EnrichedText>(Transcription_Original_Json);
+                set => Transcription_Original_Json = JsonSerializer.Serialize(value);
+            }
+            public string Transcription_Original_Json { get; set; } = string.Empty;
 
             [IgnoreProperty]
             public EnrichedText? Title_EN

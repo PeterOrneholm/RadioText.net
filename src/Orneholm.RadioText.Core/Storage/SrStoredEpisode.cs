@@ -6,6 +6,7 @@ namespace Orneholm.RadioText.Core.Storage
     {
         public Episode Episode { get; set; } = new Episode();
         public string OriginalAudioUrl { get; set; } = string.Empty;
+        public string ImageBlobIdentifier { get; set; } = string.Empty;
         public string AudioBlobIdentifier { get; set; } = string.Empty;
         public string AudioUrl { get; set; } = string.Empty;
         public string AudioExtension { get; set; } = string.Empty;
