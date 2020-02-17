@@ -1,54 +1,57 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Storage.Blob;
-using Newtonsoft.Json;
+using Orneholm.RadioText.Core.Storage;
 using Orneholm.RadioText.Web.Models;
 
 namespace Orneholm.RadioText.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly CloudBlobClient _cloudBlobClient;
+        private readonly ISummaryStorage _summaryStorage;
 
-        public HomeController(CloudBlobClient cloudBlobClient)
+        public HomeController(ISummaryStorage summaryStorage)
         {
-            _cloudBlobClient = cloudBlobClient;
+            _summaryStorage = summaryStorage;
         }
 
-        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> Index(string entityName = null, string entityType = null, string keyphrase = null)
         {
-            var blobContainer = _cloudBlobClient.GetContainerReference("newsmediaepisodes");
+            var episodes = await _summaryStorage.ListSummarizedEpisode(100);
 
-            var srAnalyzedEpisodes = new List<SrAnalyzedEpisode>();
-            foreach (var item in blobContainer.ListBlobs(null, true).OfType<CloudBlockBlob>())
+            var filteredEpisodes = FilterEpisodes(entityName, entityType, keyphrase, episodes);
+            var orderedEpisodes = OrderEpisodes(filteredEpisodes);
+
+            return View(new HomeIndexViewModel()
             {
-                var json = await item.DownloadTextAsync();
-                var srAnalyzedEpisode = JsonConvert.DeserializeObject<SrAnalyzedEpisode>(json);
-                srAnalyzedEpisodes.Add(srAnalyzedEpisode);
-            }
+                Episodes = orderedEpisodes.ToList()
+            });
+        }
 
-            var filtered = srAnalyzedEpisodes;
+        private static IOrderedEnumerable<SrStoredSummarizedEpisode> OrderEpisodes(List<SrStoredSummarizedEpisode> filteredEpisodes)
+        {
+            return filteredEpisodes.OrderByDescending(x => x.PublishDateUtc);
+        }
+
+        private static List<SrStoredSummarizedEpisode> FilterEpisodes(string entityName, string entityType, string keyphrase, List<SrStoredSummarizedEpisode> episodes)
+        {
+            var filteredEpisodes = episodes;
             if (!string.IsNullOrWhiteSpace(entityName))
             {
-                filtered = filtered
-                    .Where(x => x.TranscriptionEntities.Any(y => y.Name == entityName && (string.IsNullOrWhiteSpace(entityType) || y.Type == entityType)))
+                filteredEpisodes = filteredEpisodes
+                    .Where(x => x.Transcription_Original.Entities.Any(y => y.Name == entityName && (string.IsNullOrWhiteSpace(entityType) || y.Type == entityType)))
                     .ToList();
             }
 
             if (!string.IsNullOrWhiteSpace(keyphrase))
             {
-                filtered = filtered
-                    .Where(x => x.TranscriptionKeyPhrases.Contains(keyphrase))
+                filteredEpisodes = filteredEpisodes
+                    .Where(x => x.Transcription_Original.KeyPhrases.Contains(keyphrase))
                     .ToList();
             }
 
-
-            var ordered = filtered.OrderByDescending(x => x.PublishDateUtc).Take(50);
-
-            return View(ordered.ToList());
+            return filteredEpisodes;
         }
     }
 }

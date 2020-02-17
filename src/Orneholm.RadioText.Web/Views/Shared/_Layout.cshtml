@@ -1,4 +1,4 @@
-﻿@using Microsoft.Extensions.Options
+@using Microsoft.Extensions.Options
 @using Orneholm.RadioText.Web.Models
 @inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
 @inject IOptions<GoogleAnalyticsOptions> GoogleAnalyticsOptions
@@ -6,27 +6,50 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
+    <base href="/" />
+
+    <!-- CREDITS -->
+    <!--
+
+    This site is created and maintained by Peter Örneholm.
+
+    https://twitter.com/PeterOrneholm
+    https://peter.orneholm.com/
+
+    Source available at GitHub:
+    https://github.com/PeterOrneholm/RadioText.net
+
+    -->
+    <!-- Meta -->
+    <title>RadioText.net - Making news from Swedish Radio searchable!</title>
+    <meta name="author" content="Peter Örneholm (@("@PeterOrneholm"))">
+    <meta name="description" content="Making news from Swedish Radio searchable!">
+
+    <!-- Webapp -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Radio News Search</title>
-
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
-    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.11.2/css/all.css" integrity="sha384-zrnmn8R8KkWl12rAZFt4yKjxplaDaT7/EUkKm7AovijfrQItFWR7O/JJn4DAa/gx" crossorigin="anonymous" />
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.10.1/css/mdb.min.css" rel="stylesheet" />
 
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
     <!-- Immersive reader -->
     <script src="https://contentstorage.onenote.office.net/onenoteltir/immersivereadersdk/immersive-reader-sdk.1.0.0.js"></script>
 
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=@(GoogleAnalyticsOptions.Value.GoogleAnalyticsKey)"></script>
-    <script>
+    @if (!string.IsNullOrWhiteSpace(GoogleAnalyticsOptions.Value.GoogleAnalyticsKey))
+    {
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=@(GoogleAnalyticsOptions.Value.GoogleAnalyticsKey)"></script>
+        <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
 
         gtag('config', '@GoogleAnalyticsOptions.Value.GoogleAnalyticsKey');
-    </script>
+        </script>
+    }
 
     @Html.Raw(JavaScriptSnippet.FullScript)
 </head>

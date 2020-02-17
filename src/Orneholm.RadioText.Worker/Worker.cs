@@ -84,7 +84,8 @@ namespace Orneholm.RadioText.Worker
                 { SrProgramIds.Ekot, 5 },
                 { SrProgramIds.RadioSweden_English, 15 },
                 { SrProgramIds.RadioSweden_Arabic, 5 },
-                { SrProgramIds.P3Nyheter, 5 }
+                { SrProgramIds.P3Nyheter, 5 },
+                { SrProgramIds.RadioSweden_Finnish, 5 },
             };
 
             return await _srEpisodesLister.List(srPrograms);
@@ -139,7 +140,7 @@ namespace Orneholm.RadioText.Worker
             await RunPhase(episodeId, SrStoredEpisodePhases.Summarize, async () =>
             {
                 await _srEpisodeSummarizer.Summarize(episodeId);
-            },  () => Task.CompletedTask);
+            }, () => Task.CompletedTask);
         }
 
         private async Task RunPhase(int episodeId, SrStoredEpisodePhases phase, Func<Task> action, Func<Task> actionOnSuccess)
@@ -152,7 +153,11 @@ namespace Orneholm.RadioText.Worker
                 if (currentPhase > phase ||
                     currentPhase == phase && status.State != SrStoredEpisodeStates.Unknown)
                 {
-                    await actionOnSuccess();
+                    if (currentPhase == phase && status.State != SrStoredEpisodeStates.Error)
+                    {
+                        await actionOnSuccess();
+                    }
+
                     return;
                 }
 
