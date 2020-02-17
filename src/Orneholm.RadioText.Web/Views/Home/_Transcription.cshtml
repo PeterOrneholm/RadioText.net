@@ -8,9 +8,11 @@
                 <strong>Sentiment:</strong> @Model.EnrichedText.Sentiment?.ToString("P2")
             </p>
 
-            <p class="card-text">
+            <p class="rt-text card-text">
                 @Model.EnrichedText.Text
             </p>
+
+            <button class="btn btn-info" onclick="launchImmersiveReader('@Model.Title', this.parentNode.querySelector('.rt-text'));">Read using Immersive Reader</button>
         </div>
 
         <div class="card-text mb-3">

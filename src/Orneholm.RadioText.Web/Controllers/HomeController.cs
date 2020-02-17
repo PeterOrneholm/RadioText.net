@@ -1,7 +1,11 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Orneholm.RadioText.Core.Storage;
 using Orneholm.RadioText.Web.Models;
 
@@ -10,10 +14,12 @@ namespace Orneholm.RadioText.Web.Controllers
     public class HomeController : Controller
     {
         private readonly ISummaryStorage _summaryStorage;
+        private readonly ImmersiveReaderOptions _immersiveReaderOptions;
 
-        public HomeController(ISummaryStorage summaryStorage)
+        public HomeController(ISummaryStorage summaryStorage, IOptions<ImmersiveReaderOptions> immersiveReaderOptions)
         {
             _summaryStorage = summaryStorage;
+            _immersiveReaderOptions = immersiveReaderOptions.Value;
         }
 
         [Route("/")]
@@ -82,6 +88,32 @@ namespace Orneholm.RadioText.Web.Controllers
             }
 
             return filteredEpisodes;
+        }
+
+
+        [HttpGet("/api/immersivereader/token")]
+        public async Task<JsonResult> GetTokenAndSubdomain()
+        {
+            var tokenResult = await GetTokenAsync();
+
+            return new JsonResult(new
+            {
+                token = tokenResult,
+                subdomain = _immersiveReaderOptions.Subdomain
+            });
+        }
+
+        private async Task<string> GetTokenAsync()
+        {
+            var authority = $"https://login.windows.net/{_immersiveReaderOptions.TenantId}";
+            const string resource = "https://cognitiveservices.azure.com/";
+
+            var authContext = new AuthenticationContext(authority);
+            var clientCredential = new ClientCredential(_immersiveReaderOptions.ClientId, _immersiveReaderOptions.ClientSecret);
+
+            var authResult = await authContext.AcquireTokenAsync(resource, clientCredential);
+
+            return authResult.AccessToken;
         }
     }
 }

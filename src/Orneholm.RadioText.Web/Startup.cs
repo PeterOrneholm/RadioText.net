@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Extensions.Configuration;
@@ -40,7 +41,7 @@ namespace Orneholm.RadioText.Web
             ));
 
             services.Configure<GoogleAnalyticsOptions>(Configuration);
-            services.Configure<ImmersiveReaderOptions>(Configuration);
+            services.Configure<ImmersiveReaderOptions>(Configuration.GetSection("ImmersiveReader"));
 
 
             services.AddControllersWithViews()
@@ -60,13 +61,23 @@ namespace Orneholm.RadioText.Web
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ContentTypeProvider = GetContentTypeProvider()
+            });
 
             app.UseRouting();
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapDefaultControllerRoute(); });
+        }
+
+        private static FileExtensionContentTypeProvider GetContentTypeProvider()
+        {
+            var provider = new FileExtensionContentTypeProvider();
+            provider.Mappings[".webmanifest"] = "application/manifest+json";
+            return provider;
         }
     }
 }

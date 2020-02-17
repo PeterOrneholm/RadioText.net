@@ -50,6 +50,7 @@
                     <div class="tab-pane fade show active" id="tab-lang-default">
                         @await Html.PartialAsync("_Transcription", new TranscriptionPartialViewModel
                         {
+                            Title = Model.Episode.Title_Original.Text,
                             EnrichedText = Model.Episode.Transcription_Original
                         })
                     </div>
@@ -58,6 +59,7 @@
                 <div class="tab-pane fade @(isSpecialLocale ? "" : "show active")" id="tab-lang-sv">
                     @await Html.PartialAsync("_Transcription", new TranscriptionPartialViewModel
                     {
+                        Title = Model.Episode.Title_SV.Text,
                         AudioUrl = Model.Episode.SpeechUrl_SV,
                         EnrichedText = Model.Episode.Transcription_SV
                     })
@@ -66,6 +68,7 @@
                 <div class="tab-pane fade" id="tab-lang-en">
                     @await Html.PartialAsync("_Transcription", new TranscriptionPartialViewModel
                     {
+                        Title = Model.Episode.Title_EN.Text,
                         AudioUrl = Model.Episode.SpeechUrl_EN,
                         EnrichedText = Model.Episode.Transcription_EN
                     })
@@ -77,15 +80,43 @@
 
 @section Scripts
 {
+    <script src="https://contentstorage.onenote.office.net/onenoteltir/immersivereadersdk/immersive-reader-sdk.1.0.0.js"></script>
     <script>
-        window.launchImmersiveReader = function (title, text) {
-            var content = {
-                title: title,
-                chunks: [{
-                    content: text
-                }]
-            };
-            window.ImmersiveReader.launchAsync('', '', content);
-        }
+        (function () {
+            function getTokenAndSubdomainAsync() {
+                return fetch('/api/immersivereader/token').then(response => {
+                    return response.json();
+                });
+            }
+
+            window.launchImmersiveReader = function (title, contentElement) {
+                getTokenAndSubdomainAsync()
+                    .then(function (response) {
+                        var token = response.token;
+                        var subdomain = response.subdomain;
+
+                        var data = {
+                            title: title,
+                            chunks: [{
+                                content: contentElement.innerText
+                            }]
+                        };
+
+                        var options = {
+                            "uiZIndex": 2000
+                        };
+
+                        ImmersiveReader.launchAsync(token, subdomain, data, options)
+                            .catch(function (error) {
+                                alert("Error in launching the Immersive Reader.");
+                                console.log(error);
+                            });
+                    })
+                    .catch(function (error) {
+                        alert("Error in launching the Immersive Reader.");
+                        console.log(error);
+                    });
+            }
+        }());
     </script>
 }
