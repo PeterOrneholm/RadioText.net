@@ -31,14 +31,14 @@ namespace Orneholm.RadioText.Core
             var storedEpisode = await _storage.GetEpisode(episodeId);
             if (storedEpisode == null)
             {
-                _logger.LogInformation($"Episode {episodeId} isn't available...");
+                _logger.LogWarning($"Episode {episodeId} isn't available...");
                 return;
             }
 
             var enrichedEpisode = await _storage.GetEnrichedEpisode(episodeId);
             if (enrichedEpisode == null)
             {
-                _logger.LogInformation($"Episode {episodeId} isn't enriched...");
+                _logger.LogWarning($"Episode {episodeId} isn't enriched...");
                 return;
             }
 
@@ -114,10 +114,11 @@ namespace Orneholm.RadioText.Core
                 {
                     _logger.LogError(
                         $"Error creating speech for episode {episodeId}: ErrorCode={cancellation.ErrorCode}; ErrorDetails=[{cancellation.ErrorDetails}]");
+                    throw new Exception($"Error creating speech for episode {episodeId}: ErrorCode={cancellation.ErrorCode}; ErrorDetails=[{cancellation.ErrorDetails}]");
                 }
             }
 
-            return null;
+            throw new Exception($"Unknown result status for speech: {result.Reason}");
         }
 
         private async Task<KeyValuePair<string, string>> UploadSpeech(SrStoredEpisode storedEpisode, MemoryStream stream, string voice)

@@ -61,6 +61,7 @@ namespace Orneholm.RadioText.Worker
                     services.AddTransient<IStorageTransfer, AzureStorageTransfer>();
                     services.AddTransient<IStorage, AzureTableStorage>(s => new AzureTableStorage(
                         s.GetRequiredService<CloudTableClient>(),
+                        hostContext.Configuration["AzureStorage:EpisodeStatusesTableName"],
                         hostContext.Configuration["AzureStorage:EpisodesTableName"],
                         hostContext.Configuration["AzureStorage:EpisodeTranscriptionsTableName"],
                         hostContext.Configuration["AzureStorage:EpisodeTextAnalyticsTableName"],

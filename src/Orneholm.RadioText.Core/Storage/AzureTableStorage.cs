@@ -8,17 +8,51 @@ namespace Orneholm.RadioText.Core.Storage
 {
     public class AzureTableStorage : IStorage
     {
+        private readonly CloudTable _episodesStatusTable;
         private readonly CloudTable _episodesTable;
         private readonly CloudTable _episodeTranscriptionsTable;
         private readonly CloudTable _episodeEnrichedTable;
         private readonly CloudTable _episodeSpeechTable;
 
-        public AzureTableStorage(CloudTableClient cloudTableClient, string episodesTableName, string episodeTranscriptionsTableName, string episodeEnrichedTableName, string episodeSpeechTableName)
+        public AzureTableStorage(CloudTableClient cloudTableClient, string episodeStatusesTableName, string episodesTableName, string episodeTranscriptionsTableName, string episodeEnrichedTableName, string episodeSpeechTableName)
         {
+            _episodesStatusTable = cloudTableClient.GetTableReference(episodeStatusesTableName);
             _episodesTable = cloudTableClient.GetTableReference(episodesTableName);
             _episodeTranscriptionsTable = cloudTableClient.GetTableReference(episodeTranscriptionsTableName);
             _episodeEnrichedTable = cloudTableClient.GetTableReference(episodeEnrichedTableName);
             _episodeSpeechTable = cloudTableClient.GetTableReference(episodeSpeechTableName);
+        }
+
+        public async Task<SrStoredEpisodeStatus> GetEpisodeStatus(int episodeId)
+        {
+            await _episodesStatusTable.CreateIfNotExistsAsync();
+
+            var retrieveOperation = TableOperation.Retrieve<SrStoredEpisodeStatusEntity>("SrStoredEpisodeStatus", episodeId.ToString("D"));
+            var result = await _episodesStatusTable.ExecuteAsync(retrieveOperation);
+            var srStoredEpisodeStatusEntity = result.Result as SrStoredEpisodeStatusEntity;
+
+            if (srStoredEpisodeStatusEntity == null)
+            {
+                return SrStoredEpisodeStatus.Unknown(episodeId);
+            }
+
+            return new SrStoredEpisodeStatus
+            {
+                EpisodeId = srStoredEpisodeStatusEntity.EpisodeId,
+
+                Phase = srStoredEpisodeStatusEntity.Phase,
+                State = srStoredEpisodeStatusEntity.State,
+                Info = srStoredEpisodeStatusEntity.Info
+            };
+        }
+
+        public async Task StoreEpisodeStatus(int episodeId, SrStoredEpisodeStatus episode)
+        {
+            await _episodesStatusTable.CreateIfNotExistsAsync();
+
+            var entity = new SrStoredEpisodeStatusEntity(episodeId, episode);
+            var insertOrMergeOperation = TableOperation.InsertOrMerge(entity);
+            await _episodesStatusTable.ExecuteAsync(insertOrMergeOperation);
         }
 
         public async Task<SrStoredEpisode?> GetEpisode(int episodeId)
@@ -167,6 +201,30 @@ namespace Orneholm.RadioText.Core.Storage
             await _episodeSpeechTable.ExecuteAsync(insertOrMergeOperation);
         }
 
+        public class SrStoredEpisodeStatusEntity : TableEntity
+        {
+            public SrStoredEpisodeStatusEntity()
+            {
+            }
+
+            public SrStoredEpisodeStatusEntity(int episodeId, SrStoredEpisodeStatus episode)
+            {
+                PartitionKey = "SrStoredEpisodeStatus";
+                RowKey = episodeId.ToString("D");
+
+                EpisodeId = episodeId;
+                Phase = episode.Phase;
+                State = episode.State;
+                Info = episode.Info;
+            }
+
+
+            public int EpisodeId { get; set; }
+
+            public string Phase { get; set; } = SrStoredEpisodePhases.Unknown.ToString();
+            public string State { get; set; } = SrStoredEpisodeStates.Unknown;
+            public string Info { get; set; } = string.Empty;
+        }
 
         public class SrStoredEpisodeEntity : TableEntity
         {

@@ -31,21 +31,21 @@ namespace Orneholm.RadioText.Core
             var storedEpisode = await _storage.GetEpisode(episodeId);
             if (storedEpisode == null)
             {
-                _logger.LogInformation($"Episode {episodeId} isn't available...");
+                _logger.LogWarning($"Episode {episodeId} isn't available...");
                 return;
             }
 
             var storedEpisodeTranscription = await _storage.GetEpisodeTranscription(episodeId);
             if (storedEpisodeTranscription == null || storedEpisodeTranscription.Status != "Transcribed")
             {
-                _logger.LogInformation($"Episode {episodeId} isn't transcribed...");
+                _logger.LogWarning($"Episode {episodeId} isn't transcribed...");
                 return;
             }
 
             var enrichedEpisode = await _storage.GetEnrichedEpisode(episodeId);
             if (enrichedEpisode != null)
             {
-                _logger.LogInformation($"Episode {episodeId} already enriched...");
+                _logger.LogWarning($"Episode {episodeId} already enriched...");
                 return;
             }
 

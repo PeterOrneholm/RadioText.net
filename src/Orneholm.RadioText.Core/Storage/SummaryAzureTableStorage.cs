@@ -20,8 +20,11 @@ namespace Orneholm.RadioText.Core.Storage
         {
             await _episodeSummarizedTable.CreateIfNotExistsAsync();
 
-            var query = new TableQuery<SrStoredSummarizedEpisodeEntity>();
-            var token = new TableContinuationToken();
+            var query = new TableQuery<SrStoredSummarizedEpisodeEntity>
+            {
+                TakeCount = count
+            };
+            TableContinuationToken? token = null;
             var items = new List<SrStoredSummarizedEpisode>();
             var finished = false;
 
@@ -32,7 +35,7 @@ namespace Orneholm.RadioText.Core.Storage
                 items.AddRange(result.Results.Select(Map));
 
                 token = result.ContinuationToken;
-                if (items.Count >= count || !result.Results.Any())
+                if (token == null)
                 {
                     finished = true;
                 }

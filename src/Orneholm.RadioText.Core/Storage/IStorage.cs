@@ -4,6 +4,9 @@ namespace Orneholm.RadioText.Core.Storage
 {
     public interface IStorage
     {
+        Task<SrStoredEpisodeStatus> GetEpisodeStatus(int episodeId);
+        Task StoreEpisodeStatus(int episodeId, SrStoredEpisodeStatus episode);
+
         Task<SrStoredEpisode?> GetEpisode(int episodeId);
         Task StoreEpisode(int episodeId, SrStoredEpisode episode);
 

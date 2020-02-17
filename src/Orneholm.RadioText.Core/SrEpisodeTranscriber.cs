@@ -38,6 +38,7 @@ namespace Orneholm.RadioText.Core
             var storedEpisode = await _storage.GetEpisode(episodeId);
             if (storedEpisode == null)
             {
+                _logger.LogWarning($"Episode {episodeId} isn't available...");
                 return;
             }
 
@@ -124,8 +125,8 @@ namespace Orneholm.RadioText.Core
                 {
                     case "":
                     case "Failed":
-                        _logger.LogError($"Error transcribing {storedEpisode.Episode.Id}");
-                        return null;
+                        _logger.LogError($"Error transcribing {storedEpisode.Episode.Id}: {transcription.StatusMessage}");
+                        throw new Exception($"Error transcribing {storedEpisode.Episode.Id}: {transcription.StatusMessage}");
                     case "Succeeded":
                         _logger.LogInformation($"Transcribed {storedEpisode.Episode.Id}");
                         return transcription;

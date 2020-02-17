@@ -36,35 +36,58 @@ namespace Orneholm.RadioText.Core
             });
         }
 
-        public async Task<SrStoredEpisode?> Collect(int episodeId)
+        public async Task Collect(int episodeId)
         {
+            _logger.LogInformation($"Collecting SR episode {episodeId}");
+            var storedEpisode = await _storage.GetEpisode(episodeId);
+            if (storedEpisode != null)
+            {
+                _logger.LogInformation($"SR episode {episodeId} was already collected");
+                return;
+            }
+
             var episode = await GetSrEpisode(episodeId);
 
             var fileUrl = GetFileUrl(episode);
             if (fileUrl == null)
             {
-                return null;
-            }
-
-            _logger.LogInformation($"Collecting SR episode {episode.Id}");
-            var storedEpisode = await _storage.GetEpisode(episode.Id);
-            if (storedEpisode != null)
-            {
-                _logger.LogInformation($"SR episode {episode.Id} was already collected");
-                return storedEpisode;
+                throw new Exception($"SR episode {episodeId} does not have any available broadcast file, can't collect");
             }
 
             storedEpisode = await GetStoredEpisodeModel(fileUrl, episode);
-            var transferAudioBlockBlob = await _storageTransfer.TransferBlockBlobIfNotExists(_cloudBlobContainerName, storedEpisode.AudioBlobIdentifier, storedEpisode.OriginalAudioUrl);
+            var transferAudioBlockBlob = await _storageTransfer.TransferBlockBlobIfNotExists(_cloudBlobContainerName, storedEpisode.AudioBlobIdentifier, storedEpisode.OriginalAudioUrl, GetContentType(storedEpisode.AudioBlobIdentifier));
             storedEpisode.AudioUrl = transferAudioBlockBlob.ToString();
 
-            await _storageTransfer.TransferBlockBlobIfNotExists(_cloudBlobContainerName, storedEpisode.ImageBlobIdentifier, storedEpisode.OriginalAudioUrl);
+            await _storageTransfer.TransferBlockBlobIfNotExists(_cloudBlobContainerName, storedEpisode.ImageBlobIdentifier, storedEpisode.Episode.ImageUrlTemplate, GetContentType(storedEpisode.ImageBlobIdentifier));
 
             await _storage.StoreEpisode(episode.Id, storedEpisode);
 
             _logger.LogInformation($"Collected SR episode {episode.Id}");
+        }
 
-            return storedEpisode;
+        private string? GetContentType(string blobIdentifier)
+        {
+            if (blobIdentifier.EndsWith(".m4a"))
+            {
+                return "audio/m4a";
+            }
+
+            if (blobIdentifier.EndsWith(".mp3"))
+            {
+                return "audio/mpeg";
+            }
+
+            if (blobIdentifier.EndsWith(".jpg") || blobIdentifier.EndsWith(".jpeg"))
+            {
+                return "image/jpeg";
+            }
+
+            if (blobIdentifier.EndsWith(".png"))
+            {
+                return "image/png";
+            }
+
+            return null;
         }
 
         private async Task<SrStoredEpisode> GetStoredEpisodeModel(string fileUrl, Episode episode)
@@ -84,7 +107,7 @@ namespace Orneholm.RadioText.Core
                 OriginalAudioUrl = audioFinalUrl,
 
                 AudioBlobIdentifier = GetBlobName(episode.Program.Id, episode, audioExtension, "OriginalAudio"),
-                ImageBlobIdentifier = GetBlobName(episode.Program.Id, episode, imageExtension, "OriginalThumbnail"),
+                ImageBlobIdentifier = GetBlobName(episode.Program.Id, episode, imageExtension, "OriginalImage"),
 
                 AudioExtension = audioExtension,
                 AudioLocale = GetAudioLocaleForEpisode(episode)
@@ -126,8 +149,9 @@ namespace Orneholm.RadioText.Core
         private static string ProgramLocaleDefault = "sv-SE";
         private static readonly Dictionary<int, string> ProgramLocaleMapping = new Dictionary<int, string>
         {
-            { SverigesRadioApiIds.Programs.RadioSweden, "en-US" }, // Radio Sweden - English
-            { 2494, "ar-EG" } // Radio Sweden - Arabic
+            { SrProgramIds.RadioSweden_English, "en-US" },
+            { SrProgramIds.RadioSweden_Arabic, "ar-EG" },
+            { SrProgramIds.RadioSweden_Finnish, "fi-FI" }
         };
 
         private static string GetAudioLocaleForEpisode(Episode episode)

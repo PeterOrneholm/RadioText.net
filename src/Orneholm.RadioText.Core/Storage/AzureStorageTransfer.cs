@@ -43,15 +43,15 @@ namespace Orneholm.RadioText.Core.Storage
             return uris.ToDictionary(x => x.Key, x => x.Value);
         }
 
-        public async Task<Uri> TransferBlockBlobIfNotExists(string cloudBlobContainerName, string targetBlobName, string sourceUrl)
+        public async Task<Uri> TransferBlockBlobIfNotExists(string cloudBlobContainerName, string targetBlobName, string sourceUrl, string? contentType = null)
         {
             var cloudBlobContainer = _cloudBlobClient.GetContainerReference(cloudBlobContainerName);
             await cloudBlobContainer.CreateIfNotExistsAsync(BlobContainerPublicAccessType.Blob, new BlobRequestOptions(), new OperationContext());
 
-            return await TransferBlockBlobIfNotExists(cloudBlobContainer, targetBlobName, sourceUrl);
+            return await TransferBlockBlobIfNotExists(cloudBlobContainer, targetBlobName, sourceUrl, contentType);
         }
 
-        public async Task<Uri> TransferBlockBlobIfNotExists(CloudBlobContainer cloudBlobContainer, string targetBlobName, string sourceUrl)
+        public async Task<Uri> TransferBlockBlobIfNotExists(CloudBlobContainer cloudBlobContainer, string targetBlobName, string sourceUrl, string? contentType = null)
         {
             var cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(targetBlobName);
 
@@ -70,6 +70,12 @@ namespace Orneholm.RadioText.Core.Storage
             else
             {
                 _logger.LogInformation($"Blob already existed: {targetBlobName}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(contentType))
+            {
+                cloudBlockBlob.Properties.ContentType = contentType;
+                await cloudBlockBlob.SetPropertiesAsync();
             }
 
             var sas = GetContainerSasUri(cloudBlobContainer);
