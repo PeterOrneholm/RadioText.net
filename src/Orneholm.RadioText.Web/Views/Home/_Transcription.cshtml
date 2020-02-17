@@ -1,0 +1,37 @@
+@model Orneholm.RadioText.Web.Models.TranscriptionPartialViewModel
+
+    <div>
+        <div class="card-text mb-3">
+            <h3>Transcription</h3>
+
+            <p class="card-text">
+                <strong>Sentiment:</strong> @Model.EnrichedText.Sentiment?.ToString("P2")
+            </p>
+
+            <p class="card-text">
+                @Model.EnrichedText.Text
+            </p>
+        </div>
+
+        <div class="card-text mb-3">
+            <h3>Audio</h3>
+
+            <audio src="@Model.AudioUrl" controls="" style="width: 100%;"></audio>
+        </div>
+
+        <div class="card-text mb-3">
+            <h3>Keyphrases</h3>
+            @foreach (var tag in Model.EnrichedText.KeyPhrases)
+            {
+                <a href="?keyphrase=@Uri.EscapeDataString(tag)" class="badge badge-pill badge-primary">@tag</a>
+            }
+        </div>
+
+        <div class="card-text mb-3">
+            <h3>Enteties</h3>
+            @foreach (var tag in Model.EnrichedText.Entities)
+            {
+                <a href="?entityName=@Uri.EscapeDataString(tag.Name)&entityType=@Uri.EscapeDataString(tag.Type)" class="badge badge-pill badge-info">@tag.Name (@tag.Type)</a>
+            }
+        </div>
+    </div>

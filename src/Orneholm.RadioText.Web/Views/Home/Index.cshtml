@@ -1,75 +1,44 @@
 @model Orneholm.RadioText.Web.Models.HomeIndexViewModel
 
-<header>
-    <h1><i class="fad fa-radio"></i> RadioText</h1>
+<div class="rt-content">
 
-    <div class="text-white text-center" style="font-size: 0.8em;">
-        <p>
-            Transcribing news shows from <a href="https://www.sverigesradio.se/">Sveriges Radio</a> (Radio Sweden), making them searchable and filterable.<br />
-            Using <a href="https://azure.microsoft.com/en-us/services/cognitive-services/" target="_blank">Azure Cognitive Services</a> to transcribe and enrich the episodes.<br />
-            Developed by <a href="https://twitter.com/PeterOrneholm" target="_blank">@@PeterOrneholm</a> as a demo for the session <a href="http://bit.ly/peterorneholm-democratizing-ai">Democratizing AI with Azure Cognitive Services</a>.
-        </p>
-    </div>
-</header>
-
-<div style="max-width: 600px; margin: 0 auto;">
-
-    @foreach (var episode in Model.Episodes)
-    {
-        <div class="card mb-4">
-            <div style="background: url('@episode.ImageUrl') no-repeat center; background-size: cover; height: 250px;" class="card-img-top"></div>
-            <div class="card-body">
-                <h3 class="card-title">@episode.Title</h3>
-
-                <p class="card-text"><small class="text-muted">@episode.PublishDateUtc.ToLongDateString() - @episode.ProgramName</small></p>
-
-                <p class="card-text"><strong>Description:</strong> @episode.Description</p>
-
-                <iframe class="mx-y" width="100%" height="150" src="https://sverigesradio.se/embed/episode/@episode.EpisodeId" frameborder="0"></iframe>
-
-                <details class="card-text my-1">
-                    <summary class="font-weight-bold">Transcription</summary>
-
-                    @episode.Transcription
-                </details>
-
-                <details class="card-text my-1">
-                    <summary class="font-weight-bold">Keyphrases</summary>
-                    @foreach (var tag in episode.Transcription_Original.KeyPhrases)
-                    {
-                        <a href="?keyphrase=@Uri.EscapeDataString(tag)" class="badge badge-pill badge-primary">@tag</a>
-                    }
-                </details>
-
-                <details class="card-text my-1">
-                    <summary class="font-weight-bold">Enteties</summary>
-                    @foreach (var tag in episode.Transcription_Original.Entities)
-                    {
-                        <a href="?entityName=@Uri.EscapeDataString(tag.Name)&entityType=@Uri.EscapeDataString(tag.Type)" class="badge badge-pill badge-info">@tag.Name (@tag.Type)</a>
-                    }
-                </details>
-
-                <p class="card-text">
-                    <strong>Sentiment:</strong> @episode.Transcription_Original.Sentiment?.ToString("P2")
-                </p>
-
-                <a href="@episode.Url" class="btn btn-primary" style="width: 100%;">Read full article</a>
-            </div>
+    <div class="card my-5">
+        <div class="card-body">
+            <form>
+                <div class="input-group">
+                    <input type="search" class="form-control" placeholder="Search..." asp-for="@Model.SearchQuery" name="query" />
+                </div>
+            </form>
         </div>
-    }
-</div>
+    </div>
 
-@section Scripts
-{
-    <script>
-        window.launchImmersiveReader = function (title, text) {
-            var content = {
-                title: title,
-                chunks: [{
-                    content: text
-                }]
-            };
-            window.ImmersiveReader.launchAsync('', '', content);
+    <div>
+        @foreach (var episode in Model.Episodes)
+        {
+            <div class="card mb-3 rt-episode-list-item">
+                <div class="row no-gutters">
+                    <div class="col-md-5 col-lg-4">
+                        <a asp-action="Details" asp-route-id="@episode.EpisodeId" style="display: block; height: 100%; min-height: 250px; width: 100%; background: url('@episode.ImageUrl') center center; background-size: cover;">
+                            &nbsp;
+                        </a>
+                    </div>
+                    <div class="col-md-7 col-lg-8 d-flex flex-column">
+                        <div class="card-body">
+                            <h5 class="card-title">@episode.Title</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">@episode.ProgramName - @episode.PublishDateUtc</h6>
+                            <p class="card-text rt-episode-list-transcription">
+                                @episode.Transcription
+                            </p>
+                        </div>
+
+                        <div class="card-footer text-center">
+                            <a class="btn btn-primary btn-block" asp-action="Details" asp-route-id="@episode.EpisodeId">
+                                Mer info
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         }
-    </script>
-}
+    </div>
+</div>

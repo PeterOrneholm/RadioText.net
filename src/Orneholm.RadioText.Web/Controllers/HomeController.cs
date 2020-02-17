@@ -16,22 +16,52 @@ namespace Orneholm.RadioText.Web.Controllers
             _summaryStorage = summaryStorage;
         }
 
-        public async Task<IActionResult> Index(string entityName = null, string entityType = null, string keyphrase = null)
+        [Route("/")]
+        public async Task<IActionResult> Index(string entityName = null, string entityType = null, string keyphrase = null, string query = null)
         {
             var episodes = await _summaryStorage.ListSummarizedEpisode(100);
 
             var filteredEpisodes = FilterEpisodes(entityName, entityType, keyphrase, episodes);
-            var orderedEpisodes = OrderEpisodes(filteredEpisodes);
+            var searchedEpisodes = SearchEpisodes(query, filteredEpisodes);
+            var orderedEpisodes = OrderEpisodes(searchedEpisodes);
 
-            return View(new HomeIndexViewModel()
+            return View(new HomeIndexViewModel
             {
+                SearchQuery = query,
                 Episodes = orderedEpisodes.ToList()
+            });
+        }
+
+        [Route("/episode/{id}")]
+        public async Task<IActionResult> Details(int id)
+        {
+            var episode = await _summaryStorage.GetSummarizedEpisode(id);
+
+            return View(new HomeDetailsViewModel
+            {
+                Episode = episode
             });
         }
 
         private static IOrderedEnumerable<SrStoredSummarizedEpisode> OrderEpisodes(List<SrStoredSummarizedEpisode> filteredEpisodes)
         {
             return filteredEpisodes.OrderByDescending(x => x.PublishDateUtc);
+        }
+
+        private static List<SrStoredSummarizedEpisode> SearchEpisodes(string query, List<SrStoredSummarizedEpisode> episodes)
+        {
+            var filteredEpisodes = episodes;
+
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                filteredEpisodes = filteredEpisodes
+                    .Where(x => x.Transcription_Original.Text.Contains(query)
+                        || x.Transcription_EN.Text.Contains(query)
+                        || x.Transcription_SV.Text.Contains(query))
+                    .ToList();
+            }
+
+            return filteredEpisodes;
         }
 
         private static List<SrStoredSummarizedEpisode> FilterEpisodes(string entityName, string entityType, string keyphrase, List<SrStoredSummarizedEpisode> episodes)

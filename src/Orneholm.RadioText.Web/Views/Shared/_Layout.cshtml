@@ -54,11 +54,48 @@
     @Html.Raw(JavaScriptSnippet.FullScript)
 </head>
 <body>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    <div class="bg-light">
+        <div class="container">
+            <header class="rt-header">
+                <h1><a href="/"><img src="images/radiotext-logo.svg" class="rt-header-logo" /> RadioText.net</a></h1>
+            </header>
+
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
     </div>
+
+    <footer class="rt-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-4">
+                    <h4>About</h4>
+                    <p>
+                        This site transcribes news episodes from <a href="https://sverigesradio.se/">Swedish Radio</a> and makes them searchable. It uses <a href="https://www.microsoft.com/cognitive-services">Azure Cognitive Services</a> for Speech-to-Text, Text Analytics and Text-to-Speech.
+                    </p>
+                    <p>
+                        The <a href="https://github.com/PeterOrneholm/RadioText.net">Sourcecode is available at GitHub</a>.
+                    </p>
+                </div>
+
+                <div class="col-sm-4">
+                    <h4>Author</h4>
+                    <p>
+                        Developed by <a href="https://twitter.com/PeterOrneholm" target="_blank">@@PeterOrneholm</a> as a demo for the session <a href="http://bit.ly/peterorneholm-democratizing-ai">Democratizing AI with Azure Cognitive Services</a>.
+                    </p>
+                </div>
+            </div>
+            <p class="rt-footer-sitename">
+                RadioText.net
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
     @RenderSection("Scripts", required: false)
 </body>
