@@ -13,6 +13,8 @@ namespace Orneholm.RadioText.Web.Controllers
 {
     public class HomeController : Controller
     {
+        private const int EpisodesListCount = 25;
+
         private readonly ISummaryStorage _summaryStorage;
         private readonly ImmersiveReaderOptions _immersiveReaderOptions;
 
@@ -25,7 +27,7 @@ namespace Orneholm.RadioText.Web.Controllers
         [Route("/")]
         public async Task<IActionResult> Index(string entityName = null, string entityType = null, string keyphrase = null, string query = null, int? programId = null)
         {
-            var episodes = await _summaryStorage.ListMiniSummarizedEpisode(100);
+            var episodes = await _summaryStorage.ListMiniSummarizedEpisode(EpisodesListCount);
 
             var filteredEpisodes = FilterEpisodes(entityName, entityType, keyphrase, episodes, programId);
             var searchedEpisodes = SearchEpisodes(query, filteredEpisodes);
