@@ -5,78 +5,82 @@
     var isSpecialLocale = Model.Episode.AudioLocale != "sv-SE" && Model.Episode.AudioLocale != "en-US";
 }
 
-<div class="rt-content">
-    <div class="card mb-4">
-        <div style="background: url('@episode.ImageUrl') no-repeat center; background-size: cover; height: 350px;" class="card-img-top"></div>
-        <div class="card-body">
-            <h3 class="card-title">@episode.Title</h3>
+    <div class="rt-content">
+        <div class="card mb-4">
+            <div style="background: url('@episode.ImageUrl') no-repeat center; background-size: cover; height: 350px;" class="card-img-top"></div>
+            <div class="card-body">
+                <h3 class="card-title">@episode.Title</h3>
 
-            <p class="card-text"><small class="text-muted">@episode.ProgramName - @episode.PublishDateUtc.ToLongDateString()</small></p>
+                <p class="card-text"><small class="text-muted">@episode.ProgramName - @episode.PublishDateUtc.ToLongDateString()</small></p>
 
-            <p class="card-text">@episode.Description</p>
+                <p class="card-text">@episode.Description</p>
 
-            <p class="card-text">
-                <a href="@episode.Url">Read full article</a>
-            </p>
+                <p class="card-text">
+                    <a href="@episode.Url">Read full article</a>
+                </p>
 
-            <iframe class="mx-y" width="100%" height="150" src="https://sverigesradio.se/embed/episode/@episode.EpisodeId" frameborder="0"></iframe>
+                <iframe class="mx-y" width="100%" height="150" src="https://sverigesradio.se/embed/episode/@episode.EpisodeId" frameborder="0"></iframe>
+            </div>
         </div>
-    </div>
 
-    <h2 class="my-3">Extracted information</h2>
+        <h2 class="my-3">Extracted information</h2>
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs">
-                @if (isSpecialLocale)
-                {
+        <div class="alert alert-info my-4">
+            <strong>Note:</strong> The information below is automatically extracted by an AI based on the the audio above. It is not verified by any human and there will most likely be inaccuracies compared to the source.
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs">
+                    @if (isSpecialLocale)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="list" href="#tab-lang-default">Default (@episode.AudioLocale)</a>
+                        </li>
+                    }
+
                     <li class="nav-item">
-                        <a class="nav-link active" data-toggle="list" href="#tab-lang-default">Default (@episode.AudioLocale)</a>
+                        <a class="nav-link @(isSpecialLocale ? "" : "active")" data-toggle="list" href="#tab-lang-sv">Swedish (sv-SE)</a>
                     </li>
-                }
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="list" href="#tab-lang-en">English (en-US)</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content">
+                    @if (isSpecialLocale)
+                    {
+                        <div class="tab-pane fade show active" id="tab-lang-default">
+                            @await Html.PartialAsync("_Transcription", new TranscriptionPartialViewModel
+                            {
+                                Title = Model.Episode.Title_Original.Text,
+                                EnrichedText = Model.Episode.Transcription_Original
+                            })
+                        </div>
+                    }
 
-                <li class="nav-item">
-                    <a class="nav-link @(isSpecialLocale ? "" : "active")" data-toggle="list" href="#tab-lang-sv">Swedish (sv-SE)</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="list" href="#tab-lang-en">English (en-US)</a>
-                </li>
-            </ul>
-        </div>
-        <div class="card-body">
-            <div class="tab-content">
-                @if (isSpecialLocale)
-                {
-                    <div class="tab-pane fade show active" id="tab-lang-default">
+                    <div class="tab-pane fade @(isSpecialLocale ? "" : "show active")" id="tab-lang-sv">
                         @await Html.PartialAsync("_Transcription", new TranscriptionPartialViewModel
                         {
-                            Title = Model.Episode.Title_Original.Text,
-                            EnrichedText = Model.Episode.Transcription_Original
+                            Title = Model.Episode.Title_SV.Text,
+                            AudioUrl = Model.Episode.SpeechUrl_SV,
+                            EnrichedText = Model.Episode.Transcription_SV
                         })
                     </div>
-                }
 
-                <div class="tab-pane fade @(isSpecialLocale ? "" : "show active")" id="tab-lang-sv">
-                    @await Html.PartialAsync("_Transcription", new TranscriptionPartialViewModel
-                    {
-                        Title = Model.Episode.Title_SV.Text,
-                        AudioUrl = Model.Episode.SpeechUrl_SV,
-                        EnrichedText = Model.Episode.Transcription_SV
-                    })
-                </div>
-
-                <div class="tab-pane fade" id="tab-lang-en">
-                    @await Html.PartialAsync("_Transcription", new TranscriptionPartialViewModel
-                    {
-                        Title = Model.Episode.Title_EN.Text,
-                        AudioUrl = Model.Episode.SpeechUrl_EN,
-                        EnrichedText = Model.Episode.Transcription_EN
-                    })
+                    <div class="tab-pane fade" id="tab-lang-en">
+                        @await Html.PartialAsync("_Transcription", new TranscriptionPartialViewModel
+                        {
+                            Title = Model.Episode.Title_EN.Text,
+                            AudioUrl = Model.Episode.SpeechUrl_EN,
+                            EnrichedText = Model.Episode.Transcription_EN
+                        })
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 @section Scripts
 {
