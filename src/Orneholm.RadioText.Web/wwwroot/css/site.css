@@ -80,3 +80,8 @@ body {
     overflow-y: hidden;
     text-overflow: ellipsis;
 }
+
+.rt-badge {
+    font-size: 110%;
+    margin: 5px;
+}

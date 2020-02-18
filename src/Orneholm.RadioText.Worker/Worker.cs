@@ -61,6 +61,7 @@ namespace Orneholm.RadioText.Worker
                         catch (Exception e)
                         {
                             _logger.LogError(e, $"Failed working on episode {episodeId}");
+                            throw;
                         }
                     }, stoppingToken).ContinueWith(task =>
                     {
@@ -81,11 +82,11 @@ namespace Orneholm.RadioText.Worker
         {
             var srPrograms = new Dictionary<int, int>
             {
-                { SrProgramIds.Ekot, 5 },
-                { SrProgramIds.RadioSweden_English, 15 },
-                { SrProgramIds.RadioSweden_Arabic, 5 },
-                { SrProgramIds.P3Nyheter, 5 },
-                { SrProgramIds.RadioSweden_Finnish, 5 },
+                { SrProgramIds.Ekot, 3 },
+                { SrProgramIds.RadioSweden_English, 3 },
+                { SrProgramIds.RadioSweden_Arabic, 3 },
+                { SrProgramIds.P3Nyheter, 3 },
+                { SrProgramIds.RadioSweden_Finnish, 3 },
             };
 
             return await _srEpisodesLister.List(srPrograms);
@@ -171,6 +172,7 @@ namespace Orneholm.RadioText.Worker
             {
                 _logger.LogError($"Error on phase {phase} for episode {episodeId}", e);
                 await _storage.StoreEpisodeStatus(episodeId, SrStoredEpisodeStatus.Error(episodeId, phase, e.Message));
+                throw;
             }
         }
     }

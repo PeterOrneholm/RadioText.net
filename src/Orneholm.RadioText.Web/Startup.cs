@@ -25,12 +25,6 @@ namespace Orneholm.RadioText.Web
         {
             services.AddTransient(x =>
             {
-                var storageAccount = CloudStorageAccount.Parse(Configuration["AzureStorage:ConnectionString"]);
-                return storageAccount.CreateCloudBlobClient();
-            });
-
-            services.AddTransient(x =>
-            {
                 var storageAccount = Microsoft.Azure.Cosmos.Table.CloudStorageAccount.Parse(Configuration["AzureStorage:ConnectionString"]);
                 return storageAccount.CreateCloudTableClient(new TableClientConfiguration());
             });

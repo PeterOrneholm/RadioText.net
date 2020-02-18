@@ -1,39 +1,56 @@
 @model Orneholm.RadioText.Web.Models.TranscriptionPartialViewModel
 
-    <div>
-        <div class="card-text mb-3">
-            <h3>Transcription</h3>
+<div>
+    <div class="card-text mb-3">
+        <h3>Transcription</h3>
 
-            <p class="card-text">
-                <strong>Sentiment:</strong> @Model.EnrichedText.Sentiment?.ToString("P2")
-            </p>
+        <p class="card-text">
+            <strong>Sentiment:</strong> @Model.EnrichedText.Sentiment?.ToString("P2")
+        </p>
 
-            <p class="rt-text card-text">
-                @Model.EnrichedText.Text
-            </p>
+        <p class="rt-text card-text">
+            @Model.EnrichedText.Text
+        </p>
 
-            <button class="btn btn-info" onclick="launchImmersiveReader('@Model.Title', this.parentNode.querySelector('.rt-text'));">Read using Immersive Reader</button>
-        </div>
+        <button class="btn btn-info" onclick="launchImmersiveReader('@Model.Title', this.parentNode.querySelector('.rt-text'));">Read using Immersive Reader</button>
+    </div>
 
-        <div class="card-text mb-3">
-            <h3>Audio</h3>
-
+    <div class="card-text mb-3">
+        <h3>Audio</h3>
+        @if (!string.IsNullOrWhiteSpace(Model.AudioUrl))
+        {
             <audio src="@Model.AudioUrl" controls="" style="width: 100%;"></audio>
-        </div>
+        }
+        else
+        {
+            <p class="card-text">
+                No audio available for this episode / lanuage.
+            </p>
+        }
+    </div>
 
-        <div class="card-text mb-3">
-            <h3>Keyphrases</h3>
+    <div class="card-text my-5">
+        <h3>Keyphrases</h3>
+        <ul class="list-unstyled">
             @foreach (var tag in Model.EnrichedText.KeyPhrases)
             {
-                <a href="?keyphrase=@Uri.EscapeDataString(tag)" class="badge badge-pill badge-primary">@tag</a>
+                <li><a href="?keyphrase=@Uri.EscapeDataString(tag)" class="badge badge-primary rt-badge">@tag</a></li>
             }
-        </div>
-
-        <div class="card-text mb-3">
-            <h3>Enteties</h3>
-            @foreach (var tag in Model.EnrichedText.Entities)
-            {
-                <a href="?entityName=@Uri.EscapeDataString(tag.Name)&entityType=@Uri.EscapeDataString(tag.Type)" class="badge badge-pill badge-info">@tag.Name (@tag.Type)</a>
-            }
-        </div>
+        </ul>
     </div>
+
+    <div class="card-text my-5">
+        <h3>Enteties</h3>
+        @foreach (var category in Model.EnrichedText.GetEntitiesByCategory())
+        {
+            <h4>@category.Key</h4>
+
+            <ul class="list-unstyled">
+                @foreach (var entity in category.Value)
+                {
+                    <li><a href="?entityName=@Uri.EscapeDataString(entity.Name)&entityType=@Uri.EscapeDataString(entity.Type)" class="badge badge-info rt-badge">@entity.Name</a></li>
+                }
+            </ul>
+        }
+    </div>
+</div>

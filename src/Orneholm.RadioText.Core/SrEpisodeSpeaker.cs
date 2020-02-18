@@ -112,10 +112,12 @@ namespace Orneholm.RadioText.Core
 
                 if (cancellation.Reason == CancellationReason.Error)
                 {
+                    // Expect some texts to be to long etc
                     _logger.LogError(
                         $"Error creating speech for episode {episodeId}: ErrorCode={cancellation.ErrorCode}; ErrorDetails=[{cancellation.ErrorDetails}]");
-                    throw new Exception($"Error creating speech for episode {episodeId}: ErrorCode={cancellation.ErrorCode}; ErrorDetails=[{cancellation.ErrorDetails}]");
                 }
+
+                return null;
             }
 
             throw new Exception($"Unknown result status for speech: {result.Reason}");

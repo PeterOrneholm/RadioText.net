@@ -34,13 +34,13 @@ namespace Orneholm.RadioText.Worker
 
                     services.AddTransient(x =>
                     {
-                        var storageAccount = CloudStorageAccount.Parse(hostContext.Configuration["AzureStorage:ConnectionString"]);
+                        var storageAccount = CloudStorageAccount.Parse(hostContext.Configuration["AzureStorage:BlobsConnectionString"]);
                         return storageAccount.CreateCloudBlobClient();
                     });
 
                     services.AddTransient(x =>
                     {
-                        var storageAccount = Microsoft.Azure.Cosmos.Table.CloudStorageAccount.Parse(hostContext.Configuration["AzureStorage:ConnectionString"]);
+                        var storageAccount = Microsoft.Azure.Cosmos.Table.CloudStorageAccount.Parse(hostContext.Configuration["AzureStorage:TablesConnectionString"]);
                         return storageAccount.CreateCloudTableClient(new TableClientConfiguration());
                     });
 
