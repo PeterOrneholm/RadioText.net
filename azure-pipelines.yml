@@ -4,7 +4,7 @@ name: $(Date:yyyyMMdd)$(Rev:r)
 
 variables:
   vmImage: 'ubuntu-latest'
-  dockerImageName: 'orneholmcognitivejukeboxweb'
+  dockerImageName: 'orneholmradiotextweb'
   dockerImageTag: $(Build.BuildNumber)
 
 trigger:
@@ -27,11 +27,6 @@ stages:
     steps:
 
     - task: Docker@2
-      displayName: Login to ACR
-      inputs:
-        command: login
-        containerRegistry: acrDockerRegistryServiceConnection
-    - task: Docker@2
       displayName: Login to Docker Hub
       inputs:
         command: login
@@ -41,8 +36,8 @@ stages:
       inputs:
         command: buildAndPush
         buildContext: ''
-        repository: peterorneholm/orneholmcognitivejukeboxweb
-        Dockerfile: src/Orneholm.CognitiveJukebox.Web/Dockerfile
+        repository: peterorneholm/orneholmradiotextweb
+        Dockerfile: src/Orneholm.RadioText.Web/Dockerfile
         tags: |
           latest
           $(dockerImageTag)
