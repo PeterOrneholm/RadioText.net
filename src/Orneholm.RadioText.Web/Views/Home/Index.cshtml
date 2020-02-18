@@ -2,7 +2,7 @@
 
 <div class="rt-content">
 
-    <div class="card my-5">
+    <div class="card mb-5">
         <div class="card-body">
             <form>
                 <div class="input-group">
@@ -25,9 +25,9 @@
                     <div class="col-md-7 col-lg-8 d-flex flex-column">
                         <div class="card-body">
                             <h5 class="card-title">@episode.Title</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">@episode.ProgramName - @episode.PublishDateUtc</h6>
+                            <h6 class="card-subtitle mb-2 text-muted"><a href="/?programId=@episode.ProgramId">@episode.ProgramName</a> - @episode.PublishDateUtc</h6>
                             <p class="card-text rt-episode-list-transcription">
-                                @episode.Transcription
+                                @episode.Transcription_Original.Text
                             </p>
                         </div>
 

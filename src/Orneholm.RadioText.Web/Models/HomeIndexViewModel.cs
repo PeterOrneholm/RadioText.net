@@ -5,7 +5,7 @@ namespace Orneholm.RadioText.Web.Models
 {
     public class HomeIndexViewModel
     {
-        public List<SrStoredSummarizedEpisode> Episodes { get; set; }
+        public List<SrStoredMiniSummarizedEpisode> Episodes { get; set; }
         public string SearchQuery { get; set; }
     }
 }

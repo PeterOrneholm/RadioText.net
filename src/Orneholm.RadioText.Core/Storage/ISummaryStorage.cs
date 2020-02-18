@@ -6,6 +6,7 @@ namespace Orneholm.RadioText.Core.Storage
     public interface ISummaryStorage
     {
         Task<List<SrStoredSummarizedEpisode>> ListSummarizedEpisode(int count = 100);
+        Task<List<SrStoredMiniSummarizedEpisode>> ListMiniSummarizedEpisode(int count = 100);
         Task<SrStoredSummarizedEpisode?> GetSummarizedEpisode(int episodeId);
         Task StoreSummarizedEpisode(int episodeId, SrStoredSummarizedEpisode episode);
     }

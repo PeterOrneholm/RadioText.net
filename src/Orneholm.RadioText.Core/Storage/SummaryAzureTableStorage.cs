@@ -44,6 +44,54 @@ namespace Orneholm.RadioText.Core.Storage
             return items.Take(count).ToList();
         }
 
+        public async Task<List<SrStoredMiniSummarizedEpisode>> ListMiniSummarizedEpisode(int count = 100)
+        {
+            await _episodeSummarizedTable.CreateIfNotExistsAsync();
+
+            var query = new TableQuery<SrStoredSummarizedEpisodeEntity>
+            {
+                TakeCount = count,
+                SelectColumns = new List<string>
+                {
+                    nameof(SrStoredSummarizedEpisodeEntity.PartitionKey),
+                    nameof(SrStoredSummarizedEpisodeEntity.RowKey),
+
+                    nameof(SrStoredSummarizedEpisodeEntity.EpisodeId),
+
+                    nameof(SrStoredSummarizedEpisodeEntity.OriginalAudioUrl),
+                    nameof(SrStoredSummarizedEpisodeEntity.Title),
+                    nameof(SrStoredSummarizedEpisodeEntity.Description),
+                    nameof(SrStoredSummarizedEpisodeEntity.Url),
+
+                    nameof(SrStoredSummarizedEpisodeEntity.PublishDateUtc),
+                    nameof(SrStoredSummarizedEpisodeEntity.ImageUrl),
+
+                    nameof(SrStoredSummarizedEpisodeEntity.ProgramId),
+                    nameof(SrStoredSummarizedEpisodeEntity.ProgramName),
+
+                    nameof(SrStoredSummarizedEpisodeEntity.Transcription_Original_Json)
+                }
+            };
+            TableContinuationToken? token = null;
+            var items = new List<SrStoredMiniSummarizedEpisode>();
+            var finished = false;
+
+            while (!finished)
+            {
+                var result = await _episodeSummarizedTable.ExecuteQuerySegmentedAsync(query, token);
+
+                items.AddRange(result.Results.Select(MapMini));
+
+                token = result.ContinuationToken;
+                if (token == null)
+                {
+                    finished = true;
+                }
+            }
+
+            return items.Take(count).ToList();
+        }
+
         public async Task<SrStoredSummarizedEpisode?> GetSummarizedEpisode(int episodeId)
         {
             await _episodeSummarizedTable.CreateIfNotExistsAsync();
@@ -94,6 +142,26 @@ namespace Orneholm.RadioText.Core.Storage
                 Description_SV = srStoredSummarizedEpisodeEntity.Description_SV,
                 Transcription_SV = srStoredSummarizedEpisodeEntity.Transcription_SV,
                 SpeechUrl_SV = srStoredSummarizedEpisodeEntity.SpeechUrl_SV
+            };
+        }
+
+        private static SrStoredMiniSummarizedEpisode MapMini(SrStoredSummarizedEpisodeEntity srStoredSummarizedEpisodeEntity)
+        {
+            return new SrStoredMiniSummarizedEpisode
+            {
+                EpisodeId = srStoredSummarizedEpisodeEntity.EpisodeId,
+
+                OriginalAudioUrl = srStoredSummarizedEpisodeEntity.OriginalAudioUrl,
+
+                Title = srStoredSummarizedEpisodeEntity.Title,
+                Description = srStoredSummarizedEpisodeEntity.Description,
+                Url = srStoredSummarizedEpisodeEntity.Url,
+                PublishDateUtc = srStoredSummarizedEpisodeEntity.PublishDateUtc,
+                ImageUrl = srStoredSummarizedEpisodeEntity.ImageUrl,
+                ProgramId = srStoredSummarizedEpisodeEntity.ProgramId,
+                ProgramName = srStoredSummarizedEpisodeEntity.ProgramName,
+
+                Transcription_Original = srStoredSummarizedEpisodeEntity.Transcription_Original
             };
         }
 
