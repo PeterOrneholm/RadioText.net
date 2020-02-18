@@ -7,7 +7,7 @@
     "short_name": "RadioText.net",
     "description": "Making news from Swedish Radio searchable!",
     "orientation": "any",
-    "background_color": "#008bc3",
+    "background_color": "#1e1e1e",
     "icons": [
         {
             "src": "/images/icons/favicon.ico",
