@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orneholm.RadioText.Core", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orneholm.RadioText.Worker", "src\Orneholm.RadioText.Worker\Orneholm.RadioText.Worker.csproj", "{44DDF4CF-F781-4D82-9C0F-446399CA8C90}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orneholm.RadioText.AzureFunctions", "src\Orneholm.RadioText.AzureFunctions\Orneholm.RadioText.AzureFunctions.csproj", "{DEA7C5D3-231B-4027-83A0-CDE12BD0C921}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{44DDF4CF-F781-4D82-9C0F-446399CA8C90}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44DDF4CF-F781-4D82-9C0F-446399CA8C90}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44DDF4CF-F781-4D82-9C0F-446399CA8C90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEA7C5D3-231B-4027-83A0-CDE12BD0C921}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEA7C5D3-231B-4027-83A0-CDE12BD0C921}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEA7C5D3-231B-4027-83A0-CDE12BD0C921}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEA7C5D3-231B-4027-83A0-CDE12BD0C921}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -54,6 +60,7 @@ Global
 		{C11544C2-E1BA-45D6-8A80-12964D2F20C7} = {285F328B-E141-438D-803C-9186AB77B0E4}
 		{4226217C-11E5-41E1-8A88-0BF79AAFE85F} = {285F328B-E141-438D-803C-9186AB77B0E4}
 		{44DDF4CF-F781-4D82-9C0F-446399CA8C90} = {285F328B-E141-438D-803C-9186AB77B0E4}
+		{DEA7C5D3-231B-4027-83A0-CDE12BD0C921} = {285F328B-E141-438D-803C-9186AB77B0E4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5E2B03E0-06EB-4940-B53A-36B829F45AE0}

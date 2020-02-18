@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Orneholm.RadioText.Core;
 
-namespace Orneholm.RadioText.Worker
+namespace Orneholm.RadioText.AzureFunctions
 {
-    public class Worker : BackgroundService
+    public class SrEpisodesFunctions
     {
         private static readonly Dictionary<int, int> SrPrograms = new Dictionary<int, int>
         {
@@ -19,22 +19,18 @@ namespace Orneholm.RadioText.Worker
             { SrProgramIds.RadioSweden_Finnish, 3 },
         };
 
-        private readonly ILogger<Worker> _logger;
         private readonly SrWorker _srWorker;
 
-        public Worker(ILogger<Worker> logger, SrWorker srWorker)
+        public SrEpisodesFunctions(SrWorker srWorker)
         {
-            _logger = logger;
             _srWorker = srWorker;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        [FunctionName("CrawlSrEpisodes")]
+        public async Task Run([TimerTrigger("0 * * * *")]TimerInfo myTimer, ILogger log, CancellationToken cancellationToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                await _srWorker.Work(SrPrograms, true, stoppingToken);
-                await Task.Delay(TimeSpan.FromMinutes(15), stoppingToken);
-            }
+            log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+            await _srWorker.Work(SrPrograms, false, cancellationToken);
         }
     }
 }

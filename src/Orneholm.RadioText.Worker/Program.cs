@@ -101,6 +101,8 @@ namespace Orneholm.RadioText.Worker
                         s.GetRequiredService<CloudBlobClient>()
                     ));
 
+                    services.AddTransient<SrWorker>();
+
                     services.AddHostedService<Worker>();
                 });
 
