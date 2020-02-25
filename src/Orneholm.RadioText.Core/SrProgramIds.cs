@@ -9,5 +9,7 @@ namespace Orneholm.RadioText.Core
         public const int RadioSweden_Finnish = 5284;
 
         public const int P3Nyheter = 1646;
+
+        public const int P4_Stockholm = 701;
     }
 }

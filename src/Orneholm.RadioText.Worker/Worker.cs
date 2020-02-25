@@ -12,11 +12,15 @@ namespace Orneholm.RadioText.Worker
     {
         private static readonly Dictionary<int, int> SrPrograms = new Dictionary<int, int>
         {
-            { SrProgramIds.Ekot, 15 },
-            { SrProgramIds.RadioSweden_English, 20 },
-            { SrProgramIds.RadioSweden_Arabic, 3 },
-            { SrProgramIds.P3Nyheter, 3 },
-            { SrProgramIds.RadioSweden_Finnish, 3 },
+            { SrProgramIds.Ekot, 2 },
+
+            { SrProgramIds.RadioSweden_English, 3 },
+            { SrProgramIds.RadioSweden_Arabic, 2 },
+            { SrProgramIds.RadioSweden_Finnish, 2 },
+
+            { SrProgramIds.P3Nyheter, 2 },
+
+            { SrProgramIds.P4_Stockholm, 5 },
         };
 
         private readonly ILogger<Worker> _logger;

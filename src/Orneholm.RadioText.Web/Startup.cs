@@ -1,14 +1,14 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Azure.Cosmos.Table;
-using Microsoft.Azure.Storage.Blob;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Orneholm.RadioText.Core.Storage;
 using Orneholm.RadioText.Web.Models;
-using CloudStorageAccount = Microsoft.Azure.Storage.CloudStorageAccount;
 
 namespace Orneholm.RadioText.Web
 {
@@ -60,11 +60,28 @@ namespace Orneholm.RadioText.Web
                 ContentTypeProvider = GetContentTypeProvider()
             });
 
+            ConfigureLocalization(app);
+
             app.UseRouting();
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapDefaultControllerRoute(); });
+        }
+
+        private static void ConfigureLocalization(IApplicationBuilder app)
+        {
+            var supportedCultures = new[]
+            {
+                new CultureInfo("sv-SE")
+            };
+            app.UseRequestLocalization(new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture("sv-SE"),
+
+                SupportedCultures = supportedCultures,
+                SupportedUICultures = supportedCultures
+            });
         }
 
         private static FileExtensionContentTypeProvider GetContentTypeProvider()

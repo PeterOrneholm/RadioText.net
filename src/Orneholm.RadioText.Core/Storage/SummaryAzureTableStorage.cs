@@ -23,7 +23,9 @@ namespace Orneholm.RadioText.Core.Storage
             var query = new TableQuery<SrStoredSummarizedEpisodeEntity>
             {
                 TakeCount = count
-            };
+            }
+            .OrderByDesc("RowKey");
+
             TableContinuationToken? token = null;
             var items = new List<SrStoredSummarizedEpisode>();
             var finished = false;
@@ -41,7 +43,7 @@ namespace Orneholm.RadioText.Core.Storage
                 }
             }
 
-            return items.Take(count).ToList();
+            return items.OrderByDescending(x => x.PublishDateUtc).Take(count).ToList();
         }
 
         public async Task<List<SrStoredMiniSummarizedEpisode>> ListMiniSummarizedEpisode(int count = 100)
@@ -71,7 +73,8 @@ namespace Orneholm.RadioText.Core.Storage
 
                     nameof(SrStoredSummarizedEpisodeEntity.Transcription_Original_Json)
                 }
-            };
+            }.OrderByDesc("RowKey");
+
             TableContinuationToken? token = null;
             var items = new List<SrStoredMiniSummarizedEpisode>();
             var finished = false;
@@ -89,7 +92,7 @@ namespace Orneholm.RadioText.Core.Storage
                 }
             }
 
-            return items.Take(count).ToList();
+            return items.OrderByDescending(x => x.PublishDateUtc).Take(count).ToList();
         }
 
         public async Task<SrStoredSummarizedEpisode?> GetSummarizedEpisode(int episodeId)
