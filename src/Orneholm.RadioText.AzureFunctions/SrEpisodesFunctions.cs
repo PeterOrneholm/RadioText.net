@@ -27,7 +27,7 @@ namespace Orneholm.RadioText.AzureFunctions
         }
 
         [FunctionName("CrawlSrEpisodes")]
-        public async Task Run([TimerTrigger("0 * * * *")]TimerInfo myTimer, ILogger log, CancellationToken cancellationToken)
+        public async Task Run([TimerTrigger("0 * * * *", RunOnStartup = true)]TimerInfo myTimer, ILogger log, CancellationToken cancellationToken)
         {
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
             await _srWorker.Work(SrPrograms, false, cancellationToken);

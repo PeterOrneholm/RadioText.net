@@ -28,7 +28,7 @@ namespace Orneholm.RadioText.AzureFunctions
         public override void Configure(IFunctionsHostBuilder builder)
         {
             var services = builder.Services;
-
+            
             services.AddTransient<ISverigesRadioApiClient>(s => SverigesRadioApiClient.CreateClient());
 
             services.AddTransient(x =>
@@ -134,6 +134,8 @@ namespace Orneholm.RadioText.AzureFunctions
                     s.GetRequiredService<CloudBlobClient>()
                 );
             });
+
+            services.AddTransient<SrWorker>();
         }
 
         private class ApiKeyServiceClientCredentials : ServiceClientCredentials
