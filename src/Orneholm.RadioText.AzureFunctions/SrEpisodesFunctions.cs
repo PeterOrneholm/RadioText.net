@@ -12,11 +12,11 @@ namespace Orneholm.RadioText.AzureFunctions
     {
         private static readonly Dictionary<int, int> SrPrograms = new Dictionary<int, int>
         {
-            { SrProgramIds.Ekot, 15 },
-            { SrProgramIds.RadioSweden_English, 20 },
-            { SrProgramIds.RadioSweden_Arabic, 3 },
-            { SrProgramIds.P3Nyheter, 3 },
-            { SrProgramIds.RadioSweden_Finnish, 3 },
+            { SrProgramIds.Ekot, 5 },
+
+            { SrProgramIds.RadioSweden_English, 5 },
+
+            { SrProgramIds.P4_Stockholm, 5 }
         };
 
         private readonly SrWorker _srWorker;

@@ -28,7 +28,7 @@
                     </div>
                     <div class="col-md-6 col-lg-7 d-flex flex-column">
                         <div class="card-body">
-                            <h5 class="card-title">@episode.Title_EN.Text - @episode.PublishDateUtc.ToString("HH:mm") @episode.PublishDateUtc.ToString("dd")/@episode.PublishDateUtc.ToString("MM")</h5>
+                            <a asp-action="Details" asp-route-id="@episode.EpisodeId" class="card-title">@episode.Title_EN.Text - @episode.PublishDateUtc.ToString("HH:mm") @episode.PublishDateUtc.ToString("dd")/@episode.PublishDateUtc.ToString("MM")</a>
                             <h6 class="card-subtitle mb-2 text-muted"><a href="/?programId=@episode.ProgramId">@episode.ProgramName</a></h6>
 
                             <p class="card-text rt-episode-list-transcription">

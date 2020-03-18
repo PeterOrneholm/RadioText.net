@@ -14,13 +14,9 @@ namespace Orneholm.RadioText.Worker
         {
             { SrProgramIds.Ekot, 100 },
 
-            //{ SrProgramIds.RadioSweden_English, 5 },
-            //{ SrProgramIds.RadioSweden_Arabic, 1 },
-            //{ SrProgramIds.RadioSweden_Finnish, 1 },
+            { SrProgramIds.RadioSweden_English, 5 },
 
-            //{ SrProgramIds.P3Nyheter, 5 },
-
-            //{ SrProgramIds.P4_Stockholm, 20 }
+            { SrProgramIds.P4_Stockholm, 20 }
         };
 
         private readonly ILogger<Worker> _logger;

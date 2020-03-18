@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -84,14 +82,16 @@ namespace Orneholm.RadioText.Web.Controllers
             if (!string.IsNullOrWhiteSpace(entityName))
             {
                 filteredEpisodes = filteredEpisodes
-                    .Where(x => x.Transcription_Original.Entities.Any(y => y.Name == entityName && (string.IsNullOrWhiteSpace(entityType) || y.Type == entityType)))
+                    .Where(x => x.Transcription_Original.Entities.Any(y => y.Name == entityName && (string.IsNullOrWhiteSpace(entityType) || y.Type == entityType))
+                    || x.Transcription_English.Entities.Any(y => y.Name == entityName && (string.IsNullOrWhiteSpace(entityType) || y.Type == entityType)))
                     .ToList();
             }
 
             if (!string.IsNullOrWhiteSpace(keyphrase))
             {
                 filteredEpisodes = filteredEpisodes
-                    .Where(x => x.Transcription_Original.KeyPhrases.Contains(keyphrase))
+                    .Where(x => x.Transcription_Original.KeyPhrases.Contains(keyphrase)
+                    || x.Transcription_English.KeyPhrases.Contains(keyphrase))
                     .ToList();
             }
 
