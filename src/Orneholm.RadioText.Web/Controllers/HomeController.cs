@@ -13,7 +13,7 @@ namespace Orneholm.RadioText.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private const int EpisodesListCount = 25;
+        private const int EpisodesListCount = 75;
 
         private readonly ISummaryStorage _summaryStorage;
         private readonly ImmersiveReaderOptions _immersiveReaderOptions;
@@ -63,7 +63,7 @@ namespace Orneholm.RadioText.Web.Controllers
             if (!string.IsNullOrWhiteSpace(query))
             {
                 filteredEpisodes = filteredEpisodes
-                    .Where(x => x.Transcription_Original.Text.Contains(query))
+                    .Where(x => x.Transcription_Original.Text.Contains(query) || x.Transcription_English.Text.Contains(query))
                     .ToList();
             }
 
