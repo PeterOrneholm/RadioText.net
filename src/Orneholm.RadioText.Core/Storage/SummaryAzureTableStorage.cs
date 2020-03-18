@@ -62,6 +62,7 @@ namespace Orneholm.RadioText.Core.Storage
 
                     nameof(SrStoredSummarizedEpisodeEntity.OriginalAudioUrl),
                     nameof(SrStoredSummarizedEpisodeEntity.Title),
+                    nameof(SrStoredSummarizedEpisodeEntity.Title_EN_Json),
                     nameof(SrStoredSummarizedEpisodeEntity.Description),
                     nameof(SrStoredSummarizedEpisodeEntity.Url),
 
@@ -71,7 +72,10 @@ namespace Orneholm.RadioText.Core.Storage
                     nameof(SrStoredSummarizedEpisodeEntity.ProgramId),
                     nameof(SrStoredSummarizedEpisodeEntity.ProgramName),
 
-                    nameof(SrStoredSummarizedEpisodeEntity.Transcription_Original_Json)
+                    nameof(SrStoredSummarizedEpisodeEntity.Transcription_Original_Json),
+                    nameof(SrStoredSummarizedEpisodeEntity.Transcription_EN_Json),
+
+                    nameof(SrStoredSummarizedEpisodeEntity.SpeechUrl_EN),
                 }
             }.OrderByDesc("RowKey");
 
@@ -157,6 +161,8 @@ namespace Orneholm.RadioText.Core.Storage
                 OriginalAudioUrl = srStoredSummarizedEpisodeEntity.OriginalAudioUrl,
 
                 Title = srStoredSummarizedEpisodeEntity.Title,
+                Title_EN = srStoredSummarizedEpisodeEntity.Title_EN,
+
                 Description = srStoredSummarizedEpisodeEntity.Description,
                 Url = srStoredSummarizedEpisodeEntity.Url,
                 PublishDateUtc = srStoredSummarizedEpisodeEntity.PublishDateUtc,
@@ -164,7 +170,10 @@ namespace Orneholm.RadioText.Core.Storage
                 ProgramId = srStoredSummarizedEpisodeEntity.ProgramId,
                 ProgramName = srStoredSummarizedEpisodeEntity.ProgramName,
 
-                Transcription_Original = srStoredSummarizedEpisodeEntity.Transcription_Original
+                Transcription_Original = srStoredSummarizedEpisodeEntity.Transcription_Original,
+                Transcription_English = srStoredSummarizedEpisodeEntity.Transcription_EN,
+
+                SpeechUrl_EN = srStoredSummarizedEpisodeEntity.SpeechUrl_EN
             };
         }
 

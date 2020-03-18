@@ -105,13 +105,14 @@ namespace Orneholm.RadioText.Core
 
         private async Task<EpisodeTexts> AnalyzeTexts(int episodeId, string title, string description, string transcription, string textLocale, string targetLocale)
         {
+            var language = targetLocale.Substring(0, 2);
             if (textLocale == targetLocale)
             {
                 return new EpisodeTexts
                 {
-                    Title = await Analyze(title),
-                    Description = await Analyze(description),
-                    Transcription = await Analyze(transcription)
+                    Title = await Analyze(title, language),
+                    Description = await Analyze(description, language),
+                    Transcription = await Analyze(transcription, language)
                 };
             }
 
@@ -129,9 +130,9 @@ namespace Orneholm.RadioText.Core
 
             return new EpisodeTexts
             {
-                Title = await Analyze(GetTranslation(0, translations)),
-                Description = await Analyze(GetTranslation(1, translations)),
-                Transcription = await Analyze(GetTranslation(2, translations))
+                Title = await Analyze(GetTranslation(0, translations), language),
+                Description = await Analyze(GetTranslation(1, translations), language),
+                Transcription = await Analyze(GetTranslation(2, translations), language)
             };
 
             string GetTranslation(int index, List<TranslationResult> t)
@@ -140,13 +141,13 @@ namespace Orneholm.RadioText.Core
             }
         }
 
-        private async Task<EnrichedText> Analyze(string text)
+        private async Task<EnrichedText> Analyze(string text, string language)
         {
             var limitedText = GetMaxLengthTextForAnalytics(text);
 
-            var keyPhrases = await _textAnalyticsClient.KeyPhrasesAsync(limitedText);
-            var sentiment = await _textAnalyticsClient.SentimentAsync(limitedText);
-            var entities = await _textAnalyticsClient.EntitiesAsync(limitedText);
+            var keyPhrases = await _textAnalyticsClient.KeyPhrasesAsync(limitedText, language: language);
+            var sentiment = await _textAnalyticsClient.SentimentAsync(limitedText, language: language);
+            var entities = await _textAnalyticsClient.EntitiesAsync(limitedText, language: language);
 
             return new EnrichedText
             {

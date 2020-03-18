@@ -6,6 +6,6 @@
 
 ## About
 
-This site transcribes news episodes from [Swedish Radio](https://sverigesradio.se/) and makes them searchable. It uses [Azure Cognitive Services](https://www.microsoft.com/cognitive-services) for Speech-to-Text, Text Analytics and Text-to-Speech.
+This site transcribes news episodes from [Swedish Radio](https://sverigesradio.se/) and makes them accessible. It uses [Azure Cognitive Services](https://www.microsoft.com/cognitive-services) for Speech-to-Text, Text Analytics and Text-to-Speech.
 
 The [Sourcecode is available at GitHub](https://github.com/PeterOrneholm/RadioText.net) and [Docker image available at Dockerhub](https://hub.docker.com/r/peterorneholm/orneholmradiotextweb).

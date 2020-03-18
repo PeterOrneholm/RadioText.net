@@ -12,28 +12,40 @@
         </div>
     </div>
 
+    <div class="alert alert-info my-4">
+        <strong>Note:</strong> Most of the information below is automatically extracted and/or translated by the AI in Azure Cognitive Services. It's based on the the information provided by Swedish Radio API. It is not verified by any human and there will most likely be inaccuracies compared to the source.
+    </div>
+
     <div>
         @foreach (var episode in Model.Episodes)
         {
             <div class="card mb-3 rt-episode-list-item">
                 <div class="row no-gutters">
-                    <div class="col-md-5 col-lg-4">
+                    <div class="col-md-6 col-lg-5">
                         <a asp-action="Details" asp-route-id="@episode.EpisodeId" style="display: block; height: 100%; min-height: 250px; width: 100%; background: url('@episode.ImageUrl') center center; background-size: cover;">
                             &nbsp;
                         </a>
                     </div>
-                    <div class="col-md-7 col-lg-8 d-flex flex-column">
+                    <div class="col-md-6 col-lg-7 d-flex flex-column">
                         <div class="card-body">
-                            <h5 class="card-title">@episode.Title</h5>
-                            <h6 class="card-subtitle mb-2 text-muted"><a href="/?programId=@episode.ProgramId">@episode.ProgramName</a> - @episode.PublishDateUtc</h6>
+                            <h5 class="card-title">@episode.Title_EN.Text - @episode.PublishDateUtc.ToString("HH:mm") @episode.PublishDateUtc.ToString("dd")/@episode.PublishDateUtc.ToString("MM")</h5>
+                            <h6 class="card-subtitle mb-2 text-muted"><a href="/?programId=@episode.ProgramId">@episode.ProgramName</a></h6>
+
                             <p class="card-text rt-episode-list-transcription">
-                                @episode.Transcription_Original.Text
+                                @episode.Transcription_English.Text
+                            </p>
+
+                            <p class="card-text">
+                                @if (!string.IsNullOrWhiteSpace(episode.SpeechUrl_EN))
+                                {
+                                    <audio src="@episode.SpeechUrl_EN" controls="" style="width: 100%;"></audio>
+                                }
                             </p>
                         </div>
 
                         <div class="card-footer text-center">
                             <a class="btn btn-primary btn-block" asp-action="Details" asp-route-id="@episode.EpisodeId">
-                                See enriched info
+                                See all episode info
                             </a>
                         </div>
                     </div>

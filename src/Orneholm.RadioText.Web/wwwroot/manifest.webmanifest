@@ -1,11 +1,11 @@
 {
     "dir": "ltr",
     "lang": "en-US",
-    "name": "RadioText.net - Making news from Swedish Radio searchable!",
+    "name": "RadioText.net - Making news from Swedish Radio accessible!",
     "display": "standalone",
     "start_url": "https://radiotext.net/",
     "short_name": "RadioText.net",
-    "description": "Making news from Swedish Radio searchable!",
+    "description": "Making news from Swedish Radio accessible!",
     "orientation": "any",
     "background_color": "#1e1e1e",
     "icons": [

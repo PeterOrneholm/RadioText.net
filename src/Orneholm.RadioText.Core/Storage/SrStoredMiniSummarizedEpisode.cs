@@ -9,6 +9,8 @@ namespace Orneholm.RadioText.Core.Storage
         public string OriginalAudioUrl { get; set; } = string.Empty;
 
         public string Title { get; set; } = string.Empty;
+        public EnrichedText? Title_EN { get; set; }
+
         public string Description { get; set; } = string.Empty;
         public string Url { get; set; } = string.Empty;
         public DateTime PublishDateUtc { get; set; }
@@ -19,5 +21,8 @@ namespace Orneholm.RadioText.Core.Storage
         public string ProgramName { get; set; } = string.Empty;
 
         public EnrichedText? Transcription_Original { get; set; }
+        public EnrichedText? Transcription_English { get; set; }
+
+        public string SpeechUrl_EN { get; set; } = string.Empty;
     }
 }
