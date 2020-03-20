@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orneholm.RadioText.Core", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orneholm.RadioText.Worker", "src\Orneholm.RadioText.Worker\Orneholm.RadioText.Worker.csproj", "{44DDF4CF-F781-4D82-9C0F-446399CA8C90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orneholm.RadioText.AzureFunctions", "src\Orneholm.RadioText.AzureFunctions\Orneholm.RadioText.AzureFunctions.csproj", "{DEA7C5D3-231B-4027-83A0-CDE12BD0C921}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orneholm.RadioText.AzureFunctions", "src\Orneholm.RadioText.AzureFunctions\Orneholm.RadioText.AzureFunctions.csproj", "{DEA7C5D3-231B-4027-83A0-CDE12BD0C921}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

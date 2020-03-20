@@ -1,56 +1,60 @@
 @model Orneholm.RadioText.Web.Models.HomeIndexViewModel
 
-<div class="rt-content">
+    <div class="rt-content">
 
-    <div class="card mb-5">
-        <div class="card-body">
-            <form>
-                <div class="input-group">
-                    <input type="search" class="form-control" placeholder="Search..." asp-for="@Model.SearchQuery" name="query" />
-                </div>
-            </form>
+        <div class="alert alert-info my-4">
+            This site transcribes News episodes (Ekot) from Swedish Radio, translates and analyzes the texts and makes them available as audio episodes in English. Listen to them below and click the header for more data on each episode.
         </div>
-    </div>
 
-    <div class="alert alert-info my-4">
-        <strong>Note:</strong> Most of the information below is automatically extracted and/or translated by the AI in Azure Cognitive Services. It's based on the the information provided by Swedish Radio API. It is not verified by any human and there will most likely be inaccuracies compared to the source.
-    </div>
-
-    <div>
-        @foreach (var episode in Model.Episodes)
-        {
-            <div class="card mb-3 rt-episode-list-item">
-                <div class="row no-gutters">
-                    <div class="col-md-6 col-lg-5">
-                        <a asp-action="Details" asp-route-id="@episode.EpisodeId" style="display: block; height: 100%; min-height: 250px; width: 100%; background: url('@episode.ImageUrl') center center; background-size: cover;">
-                            &nbsp;
-                        </a>
+        <div class="card mb-5">
+            <div class="card-body">
+                <form>
+                    <div class="input-group">
+                        <input type="search" class="form-control" placeholder="Search..." asp-for="@Model.SearchQuery" name="query" />
                     </div>
-                    <div class="col-md-6 col-lg-7 d-flex flex-column">
-                        <div class="card-body">
-                            <a asp-action="Details" asp-route-id="@episode.EpisodeId" class="card-title">@episode.Title_EN.Text - @episode.PublishDateUtc.ToString("HH:mm") @episode.PublishDateUtc.ToString("dd")/@episode.PublishDateUtc.ToString("MM")</a>
-                            <h6 class="card-subtitle mb-2 text-muted"><a href="/?programId=@episode.ProgramId">@episode.ProgramName</a></h6>
+                </form>
+            </div>
+        </div>
 
-                            <p class="card-text rt-episode-list-transcription">
-                                @episode.Transcription_English.Text
-                            </p>
+        <div class="alert alert-info my-4">
+            <strong>Note:</strong> Most of the information below is automatically extracted and/or translated by the AI in Azure Cognitive Services. It's based on the the information provided by Swedish Radio API. It is not verified by any human and there will most likely be inaccuracies compared to the source.
+        </div>
 
-                            <p class="card-text">
-                                @if (!string.IsNullOrWhiteSpace(episode.SpeechUrl_EN))
-                                {
-                                    <audio src="@episode.SpeechUrl_EN" controls="" style="width: 100%;"></audio>
-                                }
-                            </p>
-                        </div>
-
-                        <div class="card-footer text-center">
-                            <a class="btn btn-primary btn-block" asp-action="Details" asp-route-id="@episode.EpisodeId">
-                                See all episode info
+        <div>
+            @foreach (var episode in Model.Episodes)
+            {
+                <div class="card mb-3 rt-episode-list-item">
+                    <div class="row no-gutters">
+                        <div class="col-md-6 col-lg-5">
+                            <a asp-action="Details" asp-route-id="@episode.EpisodeId" style="display: block; height: 100%; min-height: 250px; width: 100%; background: url('@episode.ImageUrl') center center; background-size: cover;">
+                                &nbsp;
                             </a>
                         </div>
+                        <div class="col-md-6 col-lg-7 d-flex flex-column">
+                            <div class="card-body">
+                                <a asp-action="Details" asp-route-id="@episode.EpisodeId" class="card-title h5">@episode.Title_EN.Text - @episode.PublishDateUtc.ToString("HH:mm") @episode.PublishDateUtc.ToString("dd")/@episode.PublishDateUtc.ToString("MM")</a>
+                                <h6 class="card-subtitle mb-2 text-muted"><a href="/?programId=@episode.ProgramId">@episode.ProgramName</a></h6>
+
+                                <p class="card-text rt-episode-list-transcription">
+                                    @episode.Transcription_English.Text
+                                </p>
+
+                                <p class="card-text">
+                                    @if (!string.IsNullOrWhiteSpace(episode.SpeechUrl_EN))
+                                    {
+                                        <audio src="@episode.SpeechUrl_EN" controls="" style="width: 100%;"></audio>
+                                    }
+                                </p>
+                            </div>
+
+                            <div class="card-footer text-center">
+                                <a class="btn btn-primary btn-block" asp-action="Details" asp-route-id="@episode.EpisodeId">
+                                    See all episode info
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
+            }
+        </div>
     </div>
-</div>
