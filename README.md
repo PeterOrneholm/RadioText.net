@@ -97,7 +97,7 @@ I hadn't used this service before, but it shows great potential to make texts mo
 
 # Cost
 
-I've tried to get a grip on what the cost would be to do run this service and I estimate that to run all services for one episode of Ekot (5 minutes) the cost is roughly _€0,2_.
+I've tried to get a grip on what the cost would be to do run this service and I estimate that to run all services for one episode of Ekot (5 minutes) the cost is roughly _€0,2_. That includes transcribing, translating, anayzing and generating audio for multiple languages.
 
 * [Speech pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/)
 * [Translation pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/translator-text-api/)
