@@ -107,6 +107,9 @@ Also, there will be a cost for running the web, analyzer, and storage.
 
 # Ideas for improvement
 
+The current application was done to showcase and explore a few services, but it's not in any way feature complete. Here are a few ideas on the top of my mind.
+
+- **Improve accuracy with Custom Speech:** Using [Custom Speech}(https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/how-to-custom-speech) we could improve the accuracy of the transcriptions by training it on some common domain-specific words. For example, the jingle is often treated as a words, while it should not.
 - **Enable subtitles:** Using the timestamp data from the transcription [subtitles](https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API) could be generated. That would enable a scenario where we can combine the original audio with subtitles.
 - **Multiple voices:** A natural part of a news episode are interviews. And naturally, in interviews, there are multiple people involved. The audio I'm generating now is reading all texts with the same voice, so in scenarios when there are conversations it sounds kind of strange. Using [conversation transcription](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/conversation-transcription) it could find out who says what and generate the audio with multiple voices.
 - **Improve long audio:** The current solution will fail when generating audio for long texts. The [Long Audio API](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/long-audio-api) allows for that.
