@@ -9,7 +9,7 @@ RadioText.net is a site that transcribes news episodes from [Swedish Radio](http
 By using all of the services, you can listen to "Ekot" from Swedish Radio in English :)
 _Disclaimer:_ The site is primarily a technical demo, and should be treated as such. 
 
-![RadioText.net - Screenshot of list](docs/images/RadioText_Screenshot_List.png)
+![RadioText.net - Screenshot of list](docs/images/RadioText_Image_Screenshot_List.png)
 
 # Background
 
@@ -23,7 +23,7 @@ For some time, I had wanted to build a public demo with the AI Services in [Azur
 
 The site runs in Azure and is heavily dependant on Cognitive Services. It's split into two parts, **Collect & Analyze** and **Present & Read**.
 
-![RadioText.net - Architechture](docs/images/RadioText_Architechture.png)
+![RadioText.net - Architechture](docs/images/RadioText_Image_Architechture.png)
 
 ## Collect & Analyze
 
@@ -35,7 +35,7 @@ It's built using [.NET Core 3.1](https://dotnet.microsoft.com/) and can be hoste
 
     * JSON Response: [https://api.sr.se/api/v2/episodes/get?id=1464731&format=json](https://api.sr.se/api/v2/episodes/get?id=1464731&format=json)
 
-    ![Screenshot of SR API episode details result](docs/images/RadioText_SR_API.png)
+    ![Screenshot of SR API episode details result](docs/images/RadioText_Image_SR_API.png)
 
     The reason to cache the media is that the batch version of Speech-to-text [requires the media to be in Blob Storage](https://docs.microsoft.com/sv-se/azure/cognitive-services/speech-service/batch-transcription#storage).
 
@@ -48,7 +48,7 @@ It's built using [.NET Core 3.1](https://dotnet.microsoft.com/) and can be hoste
     * Original audio: [Audio.mp3](https://sverigesradio.se/topsy/ljudfil/srapi/7298416.m4a)
     * Transcription (Swedish): [Transcription.json](https://poradiotextprod.blob.core.windows.net/samples/1464731/SR_4540__2020-03-20_05-25__1464731__OriginalAudio.m4a__Transcription_0.json)
 
-    ![Transcription result](docs/images/RadioText_TranscriptionSample.png)
+    ![Transcription result](docs/images/RadioText_Image_TranscriptionSample.png)
 
     This site only uses the combined result but could improve the user experience by utilizing the data of individual words.
 
@@ -58,7 +58,7 @@ It's built using [.NET Core 3.1](https://dotnet.microsoft.com/) and can be hoste
 
 4.  All texts mentioned above are analyzed using [Cognitive Services Text Analytics API](https://azure.microsoft.com/en-us/services/cognitive-services/text-analytics/). That provides sentiment analysis, keyphrases and (most important) named entities. Named entities are a great way to filter and search the episodes by. It's better than keywords, as it's not only a word but also what kind of category it is. The result is stored in Cosmos DB.
 
-    ![Keyphrases and Entities](docs/images/RadioText_Text_KeyphrasesAndEntities.png)
+    ![Keyphrases and Entities](docs/images/RadioText_Image_Text_KeyphrasesAndEntities.png)
 
 5.  The translated transcriptions are then turned back into audio using [Cognitive Services Text-to-Speech](https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech/). It produces one for English and one for Swedish. For English, there is support for the [Neural Voice](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support#neural-voices) and I'm impressed by the quality, almost indistinguishable from a human. The voice for Swedish is fine, but you will hear that it's computer-generated. The generated audio is stored in Blob Storage.
 
@@ -74,24 +74,24 @@ The site that presents the data is available at [https://radiotext.net/](https:/
 
 Currently, it lists all episodes and allows for in-memory filtering and search. From the listing, you can see the first part of the transcription in English and listen to the English audio.
 
-![RadioText.net - Screenshot of list](docs/images/RadioText_Screenshot_List.png)
+![RadioText.net - Screenshot of list](docs/images/RadioText_Image_Screenshot_List.png)
 
 By entering the details page, you can explore the data in multiple languages as well as the original information from the API.
 
-![RadioText.net - Screenshot of details](docs/images/Radiotext_Screenshot_Details.png)
+![RadioText.net - Screenshot of details](docs/images/RadioText_Image_Screenshot_Details.png)
 
 ### Immersive reader
 
 [Immersive Reader](https://azure.microsoft.com/en-us/services/cognitive-services/immersive-reader/) is a tool/service that's been available for some time as part of Office, like in [OneNote](https://www.onenote.com/learningtools). It's a great way to make reading and understanding texts easier. My wife works as a speech and language pathologist and says this tool is a great way to make enable people to understand texts. I've incorporated the service into Radiotext to allow the user to read the news using this tool.
 
 Primarily, it can read the text for you, and highlight the words that are currently being read:
-![Immersive Reader - Read](docs/images/RadioText_ImmersveReader_Read.png)
+![Immersive Reader - Read](docs/images/RadioText_Image_ImmersveReader_Read.png)
 
 It can also explain certain words, using pictures:
-![Immersive Reader - Picture](docs/images/RadioText_ImmersiveReader_Picture.png)
+![Immersive Reader - Picture](docs/images/RadioText_Image_ImmersiveReader_Picture.png)
 
 And if you are learning about grammar, it can show you grammar details like what verbs are nouns, verbs, and adjectives:
-![Immersive Reader - Grammar](docs/images/RadioText_ImmersveReader_Grammar.png)
+![Immersive Reader - Grammar](docs/images/RadioText_Image_ImmersveReader_Grammar.png)
 
 I hadn't used this service before, but it shows great potential to make texts more accessible. Used with Speech-to-text, it can also give make audio more accessible.
 
