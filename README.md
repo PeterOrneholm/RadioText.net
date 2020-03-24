@@ -15,9 +15,9 @@ _Disclaimer:_ The site is primarily a technical demo, and should be treated as s
 
 Just to give you (especially non-Swedish) people a background. [Sveriges Radio (Swedish Radio)](https://sverigesradio.se/) is the public service radio in Sweden like BBC is in the UK. Swedish Radio does produce some shows in languages like [English](https://sverigesradio.se/radiosweden), [Finnish](https://sverigesradio.se/sisuradio/) and [Arabic](https://sverigesradio.se/radioswedenarabic) - but the majority is (for natural reasons) produced in Swedish.
 
-The main news show is called [Ekot ("The Echo")](https://sverigesradio.se/ekot) and they broadcast at least once an hour and the broadcasts range from 1 minute to 50 minutes. The spoken language for Ekot is Swedish.
+The main news show is called [Ekot ("The Echo")](https://sverigesradio.se/ekot) and they broadcast at least once every hour and the broadcasts range from 1 minute to 50 minutes. The spoken language for Ekot is Swedish.
 
-For some time, I had wanted to build a public demo with the AI Services in [Azure Cognitive Services](https://azure.microsoft.com/en-us/services/cognitive-services/), but as always with AI - you need some dataset to work with. It happens to be that [Sveriges Radio has an open API](https://sverigesradio.se/api/documentation/v2/index.html) with access to all of their publically available data, including audio archive - enabling me to work with the speech API:s.
+For some time, I've been wanting to build a public demo with the AI Services in [Azure Cognitive Services](https://azure.microsoft.com/en-us/services/cognitive-services/), but as always with AI - you need some datasets to work with. It just so happens that [Sveriges Radio has an open API](https://sverigesradio.se/api/documentation/v2/index.html) with access to all of their publically available data, including audio archive - enabling me to work with the speech API:s.
 
 # Architecture
 
@@ -39,11 +39,11 @@ It's built using [.NET Core 3.1](https://dotnet.microsoft.com/) and can be hoste
 
     The reason to cache the media is that the batch version of Speech-to-text [requires the media to be in Blob Storage](https://docs.microsoft.com/sv-se/azure/cognitive-services/speech-service/batch-transcription#storage).
 
-2.  Once all data is available locally, it starts the asynchronous transcription using [Cognitive Services Speech-to-text API](https://azure.microsoft.com/en-us/services/cognitive-services/speech-to-text/). It specifically uses the [batch transcription](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/batch-transcription) to support transcribing longer audio files. Note that the default speech recognition only supports 15 seconds because that one (as I've understood it) is more targeted towards understanding "commands".
+2.  Once all data is available locally, it starts the asynchronous transcription using [Cognitive Services Speech-to-text API](https://azure.microsoft.com/en-us/services/cognitive-services/speech-to-text/). It specifically uses the [batch transcription](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/batch-transcription) which supports transcribing longer audio files. Note that the default speech recognition only supports 15 seconds because it is (as I've understood it) more targeted towards understanding "commands".
 
     The raw result of the transcription is stored in Blob-storage, and the most relevant information is stored in Cosmos DB.
     
-    The transcription contains the combined result (a long string of all the text) the individual words with timestamps. A sample of such file can be found below:
+    The transcription contains the combined result (a long string of all the text) the individual words with timestamps. A sample of such a file can be found below:
     * Original page at Sveriges Radio: [Nyheter från Ekot 2020-03-20 06:25](https://sverigesradio.se/sida/avsnitt/1464731?programid=4540)
     * Original audio: [Audio.mp3](https://sverigesradio.se/topsy/ljudfil/srapi/7298416.m4a)
     * Transcription (Swedish): [Transcription.json](https://poradiotextprod.blob.core.windows.net/samples/1464731/SR_4540__2020-03-20_05-25__1464731__OriginalAudio.m4a__Transcription_0.json)
@@ -54,19 +54,19 @@ It's built using [.NET Core 3.1](https://dotnet.microsoft.com/) and can be hoste
 
 3.  All of the texts (title, description, transcription) are translated into English and Swedish (if those were not the original language of the audio) using [Cognitive Services Translator Text API](https://azure.microsoft.com/en-us/services/cognitive-services/translator-text-api/).
 
-    Sample can be found here: https://radiotext.net/episode/1464731
+    A sample can be found here: https://radiotext.net/episode/1464731
 
-4.  All texts mentioned above are analyzed using [Cognitive Services Text Analytics API](https://azure.microsoft.com/en-us/services/cognitive-services/text-analytics/). That provides sentiment analysis, keyphrases and (most important) named entities. Named entities are a great way to filter and search the episodes by. It's better than keywords, as it's not only a word but also what kind of category it is. The result is stored in Cosmos DB.
+4.  All texts mentioned above are analyzed using [Cognitive Services Text Analytics API](https://azure.microsoft.com/en-us/services/cognitive-services/text-analytics/), which provides sentiment analysis, keyphrases and (most important) named entities. Named entities are a great way to filter and search the episodes by. It's better than keywords, as it's not only a word but also what kind of category it is. The result is stored in Cosmos DB.
 
     ![Keyphrases and Entities](docs/images/RadioText_Image_Text_KeyphrasesAndEntities.png)
 
-5.  The translated transcriptions are then turned back into audio using [Cognitive Services Text-to-Speech](https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech/). It produces one for English and one for Swedish. For English, there is support for the [Neural Voice](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support#neural-voices) and I'm impressed by the quality, almost indistinguishable from a human. The voice for Swedish is fine, but you will hear that it's computer-generated. The generated audio is stored in Blob Storage.
+5.  The translated transcriptions are then converted back into audio using [Cognitive Services Text-to-Speech](https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech/). It produces one for English and one for Swedish. For English, there is support for the [Neural Voice](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support#neural-voices) and I'm impressed by the quality, it's almost indistinguishable from a human. The voice for Swedish is fine, but you will hear that it's computer-generated. The generated audio is stored in Blob Storage.
 
     * Original audio: [Audio.mp3](https://sverigesradio.se/topsy/ljudfil/srapi/7298416.m4a)
     * English audio (JessaNeural, en-US): [Speaker_en-US-JessaNeural.mp3](https://poradiotextprod.blob.core.windows.net/samples/1464731/SR_4540__2020-03-20_05-25__1464731__Speaker_en-US-JessaNeural.mp3)
     * Swedish audio (HedvigRUS, sv-SE): [Speaker_sv-SE-HedvigRUS.mp3](https://poradiotextprod.blob.core.windows.net/samples/1464731/SR_4540__2020-03-20_05-25__1464731__Speaker_sv-SE-HedvigRUS.mp3)
 
-6. Last but not least, a summary of the most relevant data from previous steps are denormalized way, once again in Cosmos DB (using Table API).
+6. Last but not least, a summary of the most relevant data from previous steps are denormalized and stored in Cosmos DB (using Table API).
 
 ## Present & Read
 
@@ -82,7 +82,7 @@ By entering the details page, you can explore the data in multiple languages as 
 
 ### Immersive reader
 
-[Immersive Reader](https://azure.microsoft.com/en-us/services/cognitive-services/immersive-reader/) is a tool/service that's been available for some time as part of Office, like in [OneNote](https://www.onenote.com/learningtools). It's a great way to make reading and understanding texts easier. My wife works as a speech and language pathologist and says this tool is a great way to make enable people to understand texts. I've incorporated the service into Radiotext to allow the user to read the news using this tool.
+[Immersive Reader](https://azure.microsoft.com/en-us/services/cognitive-services/immersive-reader/) is a tool/service that's been available for some time as part of Office, for example in [OneNote](https://www.onenote.com/learningtools). It's a great way to make reading and understanding texts easier. My wife works as a speech- and language pathologist and she says that this tool is a great way to enable people to understand texts. I've incorporated the service into Radiotext to allow the user to read the news using this tool.
 
 Primarily, it can read the text for you, and highlight the words that are currently being read:
 ![Immersive Reader - Read](docs/images/RadioText_Image_ImmersveReader_Read.png)
@@ -93,7 +93,7 @@ It can also explain certain words, using pictures:
 And if you are learning about grammar, it can show you grammar details like what verbs are nouns, verbs, and adjectives:
 ![Immersive Reader - Grammar](docs/images/RadioText_Image_ImmersveReader_Grammar.png)
 
-I hadn't used this service before, but it shows great potential to make texts more accessible. Used with Speech-to-text, it can also give make audio more accessible.
+I hadn't used this service before, but it shows great potential for making texts more accessible. Combined with Speech-to-text, it can also make audio more accessible.
 
 # Cost
 
