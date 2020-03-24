@@ -97,7 +97,7 @@ I hadn't used this service before, but it shows great potential to make texts mo
 
 # Cost
 
-I've tried to get a grip on what the cost would be to do run this service and I estimate that to run all services for one episode of Ekot (5 minutes) the cost is roughly _€0,2_. That includes transcribing, translating, anayzing and generating audio for multiple languages.
+I've tried to get a grip on what the cost would be to do run this service and I estimate that to run all services for one episode of Ekot (5 minutes) the cost is roughly _€0,2_. That includes transcribing, translating, analyzing and generating audio for multiple languages.
 
 * [Speech pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/)
 * [Translation pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/translator-text-api/)
@@ -109,7 +109,8 @@ Also, there will be a cost for running the web, analyzer, and storage.
 
 The current application was done to showcase and explore a few services, but it's not in any way feature complete. Here are a few ideas on the top of my mind.
 
-- **Improve accuracy with Custom Speech:** Using [Custom Speech}(https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/how-to-custom-speech) we could improve the accuracy of the transcriptions by training it on some common domain-specific words. For example, the jingle is often treated as a words, while it should not.
+- **Live audio transcription:** Speech to text supports [live audio transcription](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone?tabs=dotnet%2Cx-android%2Clinux%2Cjava-runtime&pivots=programming-language-csharp), so we could transcribe the [live radio feed](https://api.sr.se/api/v2/channels/132?format=json). Could be comined with subtitles idea below.
+- **Improve accuracy with Custom Speech:** Using [Custom Speech](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/how-to-custom-speech) we could improve the accuracy of the transcriptions by training it on some common domain-specific words. For example, the jingle is often treated as a words, while it should not.
 - **Enable subtitles:** Using the timestamp data from the transcription [subtitles](https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API) could be generated. That would enable a scenario where we can combine the original audio with subtitles.
 - **Multiple voices:** A natural part of a news episode are interviews. And naturally, in interviews, there are multiple people involved. The audio I'm generating now is reading all texts with the same voice, so in scenarios when there are conversations it sounds kind of strange. Using [conversation transcription](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/conversation-transcription) it could find out who says what and generate the audio with multiple voices.
 - **Improve long audio:** The current solution will fail when generating audio for long texts. The [Long Audio API](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/long-audio-api) allows for that.
