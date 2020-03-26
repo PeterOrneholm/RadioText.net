@@ -11,7 +11,7 @@ namespace Orneholm.RadioText.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private const int EpisodesListCount = 75;
+        private const int EpisodesListCount = 50;
 
         private readonly ISummaryStorage _summaryStorage;
         private readonly ImmersiveReaderOptions _immersiveReaderOptions;
@@ -34,7 +34,7 @@ namespace Orneholm.RadioText.Web.Controllers
             return View(new HomeIndexViewModel
             {
                 SearchQuery = query,
-                Episodes = orderedEpisodes.ToList()
+                Episodes = orderedEpisodes.Take(25).ToList()
             });
         }
 
