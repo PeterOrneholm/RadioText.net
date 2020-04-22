@@ -9,6 +9,7 @@ namespace Orneholm.RadioText.Core.Storage
 
         public string EpisodeAudioUrl { get; set; } = string.Empty;
         public string EpisodeAudioLocale { get; set; } = string.Empty;
+        public int EpisodeAudioDurationInSeconds { get; set; }
 
         public string EpisodeTitle { get; set; } = string.Empty;
         public string EpisodeUrl { get; set; } = string.Empty;

@@ -52,6 +52,8 @@ namespace Orneholm.RadioText.Core
         private async Task WorkOnIds(List<int> listEpisodeIds, CancellationToken stoppingToken)
         {
             var tasks = new List<Task>();
+            var _lock = new object();
+            var finishedCount = 0;
 
             foreach (var episodeId in listEpisodeIds)
             {
@@ -68,6 +70,14 @@ namespace Orneholm.RadioText.Core
                     catch (Exception e)
                     {
                         _logger.LogError(e, $"Failed working on episode {episodeId}");
+                    }
+                    finally
+                    {
+                        lock (_lock)
+                        {
+                            finishedCount++;
+                            _logger.LogInformation($"----- Finished {finishedCount} out of {listEpisodeIds.Count}");
+                        }
                     }
                 }, stoppingToken).ContinueWith(task =>
                 {

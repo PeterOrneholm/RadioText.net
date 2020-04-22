@@ -4,11 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Orneholm.RadioText.Core.Storage;
+using Orneholm.SverigesRadio.Api.Models.Response.Episodes;
 
 namespace Orneholm.RadioText.Core
 {
     public class SrEpisodeWordCounter
     {
+        private readonly IStorage _storage;
         private readonly ISummaryStorage _summaryStorage;
         private readonly IWordCountStorage _wordCountStorage;
         private readonly ILogger<SrEpisodeWordCounter> _logger;
@@ -53,16 +55,24 @@ namespace Orneholm.RadioText.Core
             new [] { "sverige" },
         };
 
-        public SrEpisodeWordCounter(ISummaryStorage summaryStorage, IWordCountStorage wordCountStorage, ILogger<SrEpisodeWordCounter> logger)
+        public SrEpisodeWordCounter(ISummaryStorage summaryStorage, IWordCountStorage wordCountStorage, ILogger<SrEpisodeWordCounter> logger, IStorage storage)
         {
             _summaryStorage = summaryStorage;
             _wordCountStorage = wordCountStorage;
             _logger = logger;
+            _storage = storage;
         }
 
 
         public async Task CountWords(int episodeId)
         {
+            var storedEpisode = await _storage.GetEpisode(episodeId);
+            if (storedEpisode == null)
+            {
+                _logger.LogWarning($"Episode {episodeId} isn't available...");
+                return;
+            }
+
             var summarizedEpisode = await _summaryStorage.GetSummarizedEpisode(episodeId);
             if (summarizedEpisode == null)
             {
@@ -70,10 +80,10 @@ namespace Orneholm.RadioText.Core
                 return;
             }
 
-            await CountWords(episodeId, summarizedEpisode);
+            await CountWords(episodeId, storedEpisode, summarizedEpisode);
         }
 
-        private async Task CountWords(int episodeId, SrStoredSummarizedEpisode summarizedEpisode)
+        private async Task CountWords(int episodeId, SrStoredEpisode storedEpisode, SrStoredSummarizedEpisode summarizedEpisode)
         {
             _logger.LogInformation($"Counting words for episode {episodeId}...");
 
@@ -86,6 +96,7 @@ namespace Orneholm.RadioText.Core
 
                 EpisodeAudioUrl = summarizedEpisode.OriginalAudioUrl,
                 EpisodeAudioLocale = summarizedEpisode.AudioLocale,
+                EpisodeAudioDurationInSeconds = GetEpisodeDuration(storedEpisode.Episode),
 
                 EpisodeTitle = summarizedEpisode.Title,
                 EpisodeUrl = summarizedEpisode.Url,
@@ -150,6 +161,14 @@ namespace Orneholm.RadioText.Core
             }
 
             return text.Substring(0, 60000 - 3) + "...";
+        }
+
+        private static int GetEpisodeDuration(Episode episode)
+        {
+            var duration = episode?.DownloadPodfile?.DurationInSeconds;
+            duration ??= episode?.Broadcast?.BroadcastFiles.FirstOrDefault()?.Duration;
+
+            return duration ?? 0;
         }
     }
 }

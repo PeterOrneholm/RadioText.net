@@ -113,7 +113,7 @@ namespace Orneholm.RadioText.AzureFunctions
                 var configuration = s.GetRequiredService<IConfiguration>();
                 return new SrEpisodeTranscriber(
                     configuration["AzureStorage:EpisodeTranscriptionsContainerName"],
-                    s.GetRequiredService<SpeechBatchClient>(),
+                    s.GetRequiredService<ISpeechBatchClientFactory>(),
                     s.GetRequiredService<IStorageTransfer>(),
                     s.GetRequiredService<ILogger<SrEpisodeCollector>>(),
                     s.GetRequiredService<IStorage>(),
@@ -128,7 +128,7 @@ namespace Orneholm.RadioText.AzureFunctions
                 var configuration = s.GetRequiredService<IConfiguration>();
                 return new SrEpisodeSpeaker(
                     configuration["AzureStorage:EpisodeSpeechContainerName"],
-                    s.GetRequiredService<SpeechConfig>(),
+                    s.GetRequiredService<ISpeechConfigFactory>(),
                     s.GetRequiredService<IStorage>(),
                     s.GetRequiredService<ILogger<SrEpisodeSpeaker>>(),
                     s.GetRequiredService<CloudBlobClient>()
