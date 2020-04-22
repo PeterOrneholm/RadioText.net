@@ -38,6 +38,7 @@ namespace Orneholm.RadioText.Core.Storage
 
                 EpisodeAudioUrl = episode.EpisodeAudioUrl;
                 EpisodeAudioLocale = episode.EpisodeAudioLocale;
+                EpisodeAudioDurationInSeconds = episode.EpisodeAudioDurationInSeconds;
 
                 EpisodeTitle = episode.EpisodeTitle;
                 EpisodeUrl = episode.EpisodeUrl;
@@ -81,6 +82,7 @@ namespace Orneholm.RadioText.Core.Storage
 
             public string EpisodeAudioUrl { get; set; } = string.Empty;
             public string EpisodeAudioLocale { get; set; } = string.Empty;
+            public int EpisodeAudioDurationInSeconds { get; set; }
 
             public string EpisodeTitle { get; set; } = string.Empty;
             public string EpisodeUrl { get; set; } = string.Empty;
