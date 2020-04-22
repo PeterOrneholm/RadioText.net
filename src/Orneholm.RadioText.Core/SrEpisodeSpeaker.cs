@@ -13,6 +13,9 @@ namespace Orneholm.RadioText.Core
 {
     public class SrEpisodeSpeaker
     {
+        private const string EnUsVoice = "en-US-AriaNeural";
+        private const string SvSeVoice = "sv-SE-HedvigRUS";
+
         private readonly CloudBlobContainer _speakerContainer;
         private readonly SpeechConfig _speechConfig;
         private readonly IStorage _storage;
@@ -60,7 +63,7 @@ namespace Orneholm.RadioText.Core
 
             if (enrichedEpisode.Transcription_EN != null)
             {
-                var result = await CreateAndUploadSpeech(episodeId, storedEpisode, enrichedEpisode.Transcription_EN.Text, "en-US", "en-US-JessaNeural");
+                var result = await CreateAndUploadSpeech(episodeId, storedEpisode, enrichedEpisode.Transcription_EN.Text, "en-US", EnUsVoice);
                 if (result != null)
                 {
                     episodeSpeech.SpeechBlobIdenitifier_EN = result.Value.Key;
@@ -70,7 +73,7 @@ namespace Orneholm.RadioText.Core
 
             if (enrichedEpisode.Transcription_SV != null)
             {
-                var result = await CreateAndUploadSpeech(episodeId, storedEpisode, enrichedEpisode.Transcription_SV.Text, "sv-SE", "sv-SE-HedvigRUS");
+                var result = await CreateAndUploadSpeech(episodeId, storedEpisode, enrichedEpisode.Transcription_SV.Text, "sv-SE", SvSeVoice);
                 if (result != null)
                 {
                     episodeSpeech.SpeechBlobIdenitifier_SV = result.Value.Key;
