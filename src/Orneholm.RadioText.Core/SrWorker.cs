@@ -20,8 +20,9 @@ namespace Orneholm.RadioText.Core
         private readonly SrEpisodeTextEnricher _srEpisodeTextEnricher;
         private readonly SrEpisodeSummarizer _srEpisodeSummarizer;
         private readonly SrEpisodeSpeaker _srEpisodeSpeaker;
+        private readonly SrEpisodeWordCounter _srEpisodeWordCounter;
 
-        public SrWorker(ILogger<SrWorker> logger, IStorage storage, SrEpisodesLister srEpisodesLister, SrEpisodeCollector srEpisodeCollector, SrEpisodeTranscriber srEpisodeTranscriber, SrEpisodeTextEnricher srEpisodeTextEnricher, SrEpisodeSummarizer srEpisodeSummarizer, SrEpisodeSpeaker srEpisodeSpeaker)
+        public SrWorker(ILogger<SrWorker> logger, IStorage storage, SrEpisodesLister srEpisodesLister, SrEpisodeCollector srEpisodeCollector, SrEpisodeTranscriber srEpisodeTranscriber, SrEpisodeTextEnricher srEpisodeTextEnricher, SrEpisodeSummarizer srEpisodeSummarizer, SrEpisodeSpeaker srEpisodeSpeaker, SrEpisodeWordCounter srEpisodeWordCounter)
         {
             _logger = logger;
             _storage = storage;
@@ -32,6 +33,7 @@ namespace Orneholm.RadioText.Core
             _srEpisodeTextEnricher = srEpisodeTextEnricher;
             _srEpisodeSummarizer = srEpisodeSummarizer;
             _srEpisodeSpeaker = srEpisodeSpeaker;
+            _srEpisodeWordCounter = srEpisodeWordCounter;
         }
 
         public async Task Work(Dictionary<int, int> srPrograms, bool cleanTranscriptions, CancellationToken stoppingToken)
@@ -43,6 +45,12 @@ namespace Orneholm.RadioText.Core
 
             var listEpisode = await ListEpisodes(srPrograms);
             var listEpisodeIds = listEpisode.Select(x => x.Id).ToList();
+
+            await WorkOnIds(listEpisodeIds, stoppingToken);
+        }
+
+        private async Task WorkOnIds(List<int> listEpisodeIds, CancellationToken stoppingToken)
+        {
             var tasks = new List<Task>();
 
             foreach (var episodeId in listEpisodeIds)
@@ -127,6 +135,17 @@ namespace Orneholm.RadioText.Core
             await RunPhase(episodeId, SrStoredEpisodePhases.Summarize, async () =>
             {
                 await _srEpisodeSummarizer.Summarize(episodeId);
+            }, async () =>
+            {
+                await CountWordsOnEpisode(episodeId);
+            });
+        }
+
+        private async Task CountWordsOnEpisode(int episodeId)
+        {
+            await RunPhase(episodeId, SrStoredEpisodePhases.CountWords, async () =>
+            {
+                await _srEpisodeWordCounter.CountWords(episodeId);
             }, () => Task.CompletedTask);
         }
 

@@ -73,7 +73,8 @@ namespace Orneholm.RadioText.Core.Storage
         Transcribe = 2,
         Enrich = 3,
         GenerateSpeech = 4,
-        Summarize = 5
+        Summarize = 5,
+        CountWords = 6
     }
 
 

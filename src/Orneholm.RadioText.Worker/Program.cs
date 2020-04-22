@@ -73,6 +73,18 @@ namespace Orneholm.RadioText.Worker
                         hostContext.Configuration["AzureStorage:EpisodeSummaryTableName"]
                     ));
 
+
+                    services.AddTransient<IWordCountStorage, WordCounterAzureTableStorage>(s =>
+                    {
+                        var storageAccount = Microsoft.Azure.Cosmos.Table.CloudStorageAccount.Parse(hostContext.Configuration["AzureStorage:BlobsConnectionString"]);
+                        var tableClient = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
+
+                        return new WordCounterAzureTableStorage(
+                            tableClient,
+                            hostContext.Configuration["AzureStorage:EpisodeWordCountTableName"]
+                        );
+                    });
+
                     services.AddTransient<SrEpisodesLister>();
                     services.AddTransient(s => new SrEpisodeCollector(
                         hostContext.Configuration["AzureStorage:AudioContainerName"],
@@ -100,6 +112,8 @@ namespace Orneholm.RadioText.Worker
                         s.GetRequiredService<ILogger<SrEpisodeSpeaker>>(),
                         s.GetRequiredService<CloudBlobClient>()
                     ));
+
+                    services.AddTransient<SrEpisodeWordCounter>();
 
                     services.AddTransient<SrWorker>();
 
