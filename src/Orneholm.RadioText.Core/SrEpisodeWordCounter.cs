@@ -35,6 +35,7 @@ namespace Orneholm.RadioText.Core
 
             new [] { "toalettpapper" },
             new [] { "handsprit" },
+            new [] { "bunkra" },
 
             new [] { "konkurs" },
             new [] { "arbetslös" },
@@ -76,7 +77,7 @@ namespace Orneholm.RadioText.Core
         {
             _logger.LogInformation($"Counting words for episode {episodeId}...");
 
-            var transcription = summarizedEpisode.Transcription_Original?.Text ?? string.Empty;
+            var transcription = summarizedEpisode.Transcription ?? string.Empty;
             var wordCount = GetWordsCount(transcription, _words);
 
             var wordCountEpisode = new SrStoredWordCountEpisode

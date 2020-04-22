@@ -17,20 +17,20 @@ namespace Orneholm.RadioText.Core
         private static readonly TimeSpan WaitBetweenStatusCheck = TimeSpan.FromSeconds(30);
 
         private readonly string _transcriptionsContainerName;
+        private readonly ISpeechBatchClientFactory _speechBatchClientFactory;
         private readonly IStorageTransfer _storageTransfer;
         private readonly ILogger<SrEpisodeCollector> _logger;
         private readonly IStorage _storage;
-        private readonly SpeechBatchClient _speechBatchClient;
         private readonly CloudBlobClient _cloudBlobClient;
 
-        public SrEpisodeTranscriber(string transcriptionsContainerName, SpeechBatchClient speechBatchClient, IStorageTransfer storageTransfer, ILogger<SrEpisodeCollector> logger, IStorage storage, CloudBlobClient cloudBlobClient)
+        public SrEpisodeTranscriber(string transcriptionsContainerName, ISpeechBatchClientFactory speechBatchClientFactory, IStorageTransfer storageTransfer, ILogger<SrEpisodeCollector> logger, IStorage storage, CloudBlobClient cloudBlobClient)
         {
             _transcriptionsContainerName = transcriptionsContainerName;
+            _speechBatchClientFactory = speechBatchClientFactory;
             _storageTransfer = storageTransfer;
             _logger = logger;
             _storage = storage;
             _cloudBlobClient = cloudBlobClient;
-            _speechBatchClient = speechBatchClient;
         }
 
         public async Task TranscribeAndPersist(int episodeId)
@@ -55,14 +55,16 @@ namespace Orneholm.RadioText.Core
                 Status = StatusTranscribing
             });
 
-            await TranscribeAndPersist(storedEpisode);
+            var speechBatchClient = _speechBatchClientFactory.Get();
+
+            await TranscribeAndPersist(storedEpisode, speechBatchClient);
         }
 
-        private async Task TranscribeAndPersist(SrStoredEpisode storedEpisode)
+        private async Task TranscribeAndPersist(SrStoredEpisode storedEpisode, SpeechBatchClient speechBatchClient)
         {
             _logger.LogInformation($"Transcribing episode {storedEpisode.Episode.Id}...");
-            var episodeTranscriptionId = await TranscribeEpisode(storedEpisode);
-            var episodeTranscription = await WaitForTranscription(episodeTranscriptionId, storedEpisode);
+            var episodeTranscriptionId = await TranscribeEpisode(storedEpisode, speechBatchClient);
+            var episodeTranscription = await WaitForTranscription(episodeTranscriptionId, storedEpisode, speechBatchClient);
             _logger.LogInformation($"Transcribed episode {storedEpisode.Episode.Id}...");
 
             if (episodeTranscription == null)
@@ -72,7 +74,7 @@ namespace Orneholm.RadioText.Core
 
             _logger.LogInformation($"Transfer transcribed episode {storedEpisode.Episode.Id}...");
             var storedEpisodeTranscription = await TransferTranscribedEpisode(episodeTranscription, storedEpisode);
-            await _speechBatchClient.DeleteTranscriptionAsync(episodeTranscriptionId);
+            await speechBatchClient.DeleteTranscriptionAsync(episodeTranscriptionId);
 
             var transcriptionResult = await GetTranscriptionResult(storedEpisodeTranscription, storedEpisodeTranscription.TranscriptionResultChannel0BlobIdentifier);
             await StoreTranscriptionResult(storedEpisode, transcriptionResult, storedEpisodeTranscription);
@@ -95,7 +97,7 @@ namespace Orneholm.RadioText.Core
             return JsonConvert.DeserializeObject<TranscriptionResult>(transcriptionBlobContent);
         }
 
-        private async Task<Guid> TranscribeEpisode(SrStoredEpisode storedEpisode)
+        private async Task<Guid> TranscribeEpisode(SrStoredEpisode storedEpisode, SpeechBatchClient speechBatchClient)
         {
             var transcriptionDefinition = TranscriptionDefinition.Create(
                 $"RadioText - Episode {storedEpisode.Episode.Id}",
@@ -104,7 +106,7 @@ namespace Orneholm.RadioText.Core
                 new Uri(storedEpisode.AudioUrl)
             );
 
-            var transcriptionLocation = await _speechBatchClient.PostTranscriptionAsync(transcriptionDefinition);
+            var transcriptionLocation = await speechBatchClient.PostTranscriptionAsync(transcriptionDefinition);
             return GetTranscriptionGuid(transcriptionLocation);
         }
 
@@ -113,11 +115,11 @@ namespace Orneholm.RadioText.Core
             return new Guid(transcriptionLocation.ToString().Split('/').LastOrDefault() ?? string.Empty);
         }
 
-        private async Task<Transcription?> WaitForTranscription(Guid transcriptionId, SrStoredEpisode storedEpisode)
+        private async Task<Transcription?> WaitForTranscription(Guid transcriptionId, SrStoredEpisode storedEpisode, SpeechBatchClient speechBatchClient)
         {
             while (true)
             {
-                var transcription = await _speechBatchClient.GetTranscriptionAsync(transcriptionId);
+                var transcription = await speechBatchClient.GetTranscriptionAsync(transcriptionId);
 
                 _logger.LogTrace($"Transcribing status for {storedEpisode.Episode.Id} is {transcription.Status}");
 
@@ -174,15 +176,6 @@ namespace Orneholm.RadioText.Core
             );
 
             return (targetBlobIdentifier, targetBlobUrl);
-        }
-
-        public async Task CleanExistingTranscriptions()
-        {
-            var transcriptions = await _speechBatchClient.GetTranscriptionsAsync();
-            foreach (var transcription in transcriptions)
-            {
-                await _speechBatchClient.DeleteTranscriptionAsync(transcription.Id);
-            }
         }
     }
 }

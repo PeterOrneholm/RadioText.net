@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using Microsoft.Azure.CognitiveServices.Language.TextAnalytics;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -44,8 +46,11 @@ namespace Orneholm.RadioText.Worker
                         return storageAccount.CreateCloudTableClient(new TableClientConfiguration());
                     });
 
-                    services.AddTransient(x => SpeechConfig.FromSubscription(hostContext.Configuration["AzureSpeech:Key"], hostContext.Configuration["AzureSpeech:Region"]));
-                    services.AddTransient(x => SpeechBatchClient.CreateApiV2Client(hostContext.Configuration["AzureSpeech:Key"], hostContext.Configuration["AzureSpeech:Hostname"], 443));
+
+                    var azureSpeechClients = new List<SpeechBatchClientOptions>();
+                    hostContext.Configuration.GetSection("AzureSpeech:Clients").Bind(azureSpeechClients);
+                    services.AddSingleton<ISpeechConfigFactory>(x => new RoundRobinSpeechConfigFactory(azureSpeechClients));
+                    services.AddSingleton<ISpeechBatchClientFactory>(x => new RoundRobinSpeechBatchClientFactory(azureSpeechClients));
 
                     services.AddTransient(x =>
                     {
@@ -96,7 +101,7 @@ namespace Orneholm.RadioText.Worker
 
                     services.AddTransient(s => new SrEpisodeTranscriber(
                         hostContext.Configuration["AzureStorage:EpisodeTranscriptionsContainerName"],
-                        s.GetRequiredService<SpeechBatchClient>(),
+                        s.GetRequiredService<ISpeechBatchClientFactory>(),
                         s.GetRequiredService<IStorageTransfer>(),
                         s.GetRequiredService<ILogger<SrEpisodeCollector>>(),
                         s.GetRequiredService<IStorage>(),
@@ -107,7 +112,7 @@ namespace Orneholm.RadioText.Worker
                     services.AddTransient<SrEpisodeSummarizer>();
                     services.AddTransient(s => new SrEpisodeSpeaker(
                         hostContext.Configuration["AzureStorage:EpisodeSpeechContainerName"],
-                        s.GetRequiredService<SpeechConfig>(),
+                        s.GetRequiredService<ISpeechConfigFactory>(),
                         s.GetRequiredService<IStorage>(),
                         s.GetRequiredService<ILogger<SrEpisodeSpeaker>>(),
                         s.GetRequiredService<CloudBlobClient>()

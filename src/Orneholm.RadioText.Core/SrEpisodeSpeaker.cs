@@ -17,14 +17,14 @@ namespace Orneholm.RadioText.Core
         private const string SvSeVoice = "sv-SE-HedvigRUS";
 
         private readonly CloudBlobContainer _speakerContainer;
-        private readonly SpeechConfig _speechConfig;
+        private readonly ISpeechConfigFactory _speechConfigFactory;
         private readonly IStorage _storage;
         private readonly ILogger<SrEpisodeSpeaker> _logger;
 
-        public SrEpisodeSpeaker(string speakerContainerName, SpeechConfig speechConfig, IStorage storage, ILogger<SrEpisodeSpeaker> logger, CloudBlobClient cloudBlobClient)
+        public SrEpisodeSpeaker(string speakerContainerName, ISpeechConfigFactory speechConfigFactory, IStorage storage, ILogger<SrEpisodeSpeaker> logger, CloudBlobClient cloudBlobClient)
         {
             _speakerContainer = cloudBlobClient.GetContainerReference(speakerContainerName);
-            _speechConfig = speechConfig;
+            _speechConfigFactory = speechConfigFactory;
             _storage = storage;
             _logger = logger;
         }
@@ -88,14 +88,15 @@ namespace Orneholm.RadioText.Core
 
         private async Task<KeyValuePair<string, string>?> CreateAndUploadSpeech(int episodeId, SrStoredEpisode storedEpisode, string text, string language, string voice)
         {
-            _speechConfig.SpeechSynthesisLanguage = language;
-            _speechConfig.SpeechSynthesisVoiceName = voice;
-            _speechConfig.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Audio24Khz160KBitRateMonoMp3);
+            var speechConfig = _speechConfigFactory.Get();
+            speechConfig.SpeechSynthesisLanguage = language;
+            speechConfig.SpeechSynthesisVoiceName = voice;
+            speechConfig.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Audio24Khz160KBitRateMonoMp3);
 
             using var stream = new MemoryStream();
             using var audioStream = AudioOutputStream.CreatePushStream(new AudioPushAudioOutputStreamCallback(stream));
             using var fileOutput = AudioConfig.FromStreamOutput(audioStream);
-            using var synthesizer = new SpeechSynthesizer(_speechConfig, fileOutput);
+            using var synthesizer = new SpeechSynthesizer(speechConfig, fileOutput);
 
             var result = await synthesizer.SpeakTextAsync(text);
 

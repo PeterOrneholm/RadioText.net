@@ -40,7 +40,7 @@ namespace Orneholm.RadioText.Core
         {
             if (cleanTranscriptions)
             {
-                await _srEpisodeTranscriber.CleanExistingTranscriptions();
+                //await _srEpisodeTranscriber.CleanExistingTranscriptions();
             }
 
             var listEpisode = await ListEpisodes(srPrograms);

@@ -12,7 +12,7 @@ namespace Orneholm.RadioText.Worker
     {
         private static readonly Dictionary<int, int> SrPrograms = new Dictionary<int, int>
         {
-            { SrProgramIds.Ekot, 4 },
+            { SrProgramIds.Ekot, 10 },
 
             //{ SrProgramIds.RadioSweden_English, 5 },
 
