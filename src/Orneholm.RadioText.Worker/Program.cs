@@ -32,7 +32,7 @@ namespace Orneholm.RadioText.Worker
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.AddTransient<ISverigesRadioApiClient>(s => SverigesRadioApiClient.CreateClient());
+                    services.AddSingleton<ISverigesRadioApiClient>(s => SverigesRadioApiClient.CreateClient());
 
                     services.AddTransient(x =>
                     {

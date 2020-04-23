@@ -19,6 +19,13 @@ namespace Orneholm.RadioText.Worker
             //{ SrProgramIds.P4_Stockholm, 20 }
         };
 
+
+        private static readonly Dictionary<int, DateRange> SrProgramWithDates = new Dictionary<int, DateRange>
+        {
+            { SrProgramIds.Ekot, new DateRange(DateTime.Now.AddDays(-7)) }
+        };
+
+
         private readonly ILogger<Worker> _logger;
         private readonly SrWorker _srWorker;
 
@@ -32,7 +39,7 @@ namespace Orneholm.RadioText.Worker
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                await _srWorker.Work(SrPrograms, true, stoppingToken);
+                await _srWorker.Work(SrProgramWithDates, true, stoppingToken);
                 await Task.Delay(TimeSpan.FromMinutes(15), stoppingToken);
             }
         }

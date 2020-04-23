@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Orneholm.RadioText.Core.Storage;
 using Orneholm.SverigesRadio.Api.Models.Response.Episodes;
+using Dasync.Collections;
 
 namespace Orneholm.RadioText.Core
 {
     public class SrWorker
     {
+        private const int MaxDegreeOfParallelism = 80;
         private readonly ILogger<SrWorker> _logger;
         private readonly IStorage _storage;
 
@@ -21,8 +23,9 @@ namespace Orneholm.RadioText.Core
         private readonly SrEpisodeSummarizer _srEpisodeSummarizer;
         private readonly SrEpisodeSpeaker _srEpisodeSpeaker;
         private readonly SrEpisodeWordCounter _srEpisodeWordCounter;
+        private readonly ISpeechBatchClientFactory _speechBatchClientFactory;
 
-        public SrWorker(ILogger<SrWorker> logger, IStorage storage, SrEpisodesLister srEpisodesLister, SrEpisodeCollector srEpisodeCollector, SrEpisodeTranscriber srEpisodeTranscriber, SrEpisodeTextEnricher srEpisodeTextEnricher, SrEpisodeSummarizer srEpisodeSummarizer, SrEpisodeSpeaker srEpisodeSpeaker, SrEpisodeWordCounter srEpisodeWordCounter)
+        public SrWorker(ILogger<SrWorker> logger, IStorage storage, SrEpisodesLister srEpisodesLister, SrEpisodeCollector srEpisodeCollector, SrEpisodeTranscriber srEpisodeTranscriber, SrEpisodeTextEnricher srEpisodeTextEnricher, SrEpisodeSummarizer srEpisodeSummarizer, SrEpisodeSpeaker srEpisodeSpeaker, SrEpisodeWordCounter srEpisodeWordCounter, ISpeechBatchClientFactory speechBatchClientFactory)
         {
             _logger = logger;
             _storage = storage;
@@ -34,13 +37,27 @@ namespace Orneholm.RadioText.Core
             _srEpisodeSummarizer = srEpisodeSummarizer;
             _srEpisodeSpeaker = srEpisodeSpeaker;
             _srEpisodeWordCounter = srEpisodeWordCounter;
+            _speechBatchClientFactory = speechBatchClientFactory;
         }
 
         public async Task Work(Dictionary<int, int> srPrograms, bool cleanTranscriptions, CancellationToken stoppingToken)
         {
             if (cleanTranscriptions)
             {
-                //await _srEpisodeTranscriber.CleanExistingTranscriptions();
+                await _speechBatchClientFactory.CleanExistingTranscriptions();
+            }
+
+            var listEpisode = await ListEpisodes(srPrograms);
+            var listEpisodeIds = listEpisode.Select(x => x.Id).ToList();
+
+            await WorkOnIds(listEpisodeIds, stoppingToken);
+        }
+
+        public async Task Work(Dictionary<int, DateRange> srPrograms, bool cleanTranscriptions, CancellationToken stoppingToken)
+        {
+            if (cleanTranscriptions)
+            {
+                await _speechBatchClientFactory.CleanExistingTranscriptions();
             }
 
             var listEpisode = await ListEpisodes(srPrograms);
@@ -51,13 +68,12 @@ namespace Orneholm.RadioText.Core
 
         private async Task WorkOnIds(List<int> listEpisodeIds, CancellationToken stoppingToken)
         {
-            var tasks = new List<Task>();
             var _lock = new object();
             var finishedCount = 0;
 
-            foreach (var episodeId in listEpisodeIds)
+            await listEpisodeIds.ParallelForEachAsync(async (episodeId) =>
             {
-                tasks.Add(Task.Run(async () =>
+                await Task.Run(async () =>
                 {
                     try
                     {
@@ -85,13 +101,16 @@ namespace Orneholm.RadioText.Core
                     {
                         throw task.Exception;
                     }
-                }, stoppingToken));
-            }
-
-            await Task.WhenAll(tasks);
+                }, stoppingToken);
+            }, maxDegreeOfParallelism: MaxDegreeOfParallelism, cancellationToken: stoppingToken);
         }
 
         private async Task<List<Episode>> ListEpisodes(Dictionary<int, int> srPrograms)
+        {
+            return await _srEpisodesLister.List(srPrograms);
+        }
+
+        private async Task<List<Episode>> ListEpisodes(Dictionary<int, DateRange> srPrograms)
         {
             return await _srEpisodesLister.List(srPrograms);
         }

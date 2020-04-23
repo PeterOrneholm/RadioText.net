@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Orneholm.RadioText.Azure.SpeechBatchClient;
 
 namespace Orneholm.RadioText.Core
@@ -25,6 +26,18 @@ namespace Orneholm.RadioText.Core
                 _index = _index % _clients.Length;
 
                 return client;
+            }
+        }
+
+        public async Task CleanExistingTranscriptions()
+        {
+            foreach (var speechBatchClient in _clients)
+            {
+                var transcriptions = await speechBatchClient.GetTranscriptionsAsync();
+                foreach (var transcription in transcriptions)
+                {
+                    await speechBatchClient.DeleteTranscriptionAsync(transcription.Id);
+                }
             }
         }
     }
