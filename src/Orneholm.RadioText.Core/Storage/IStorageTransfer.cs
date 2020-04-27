@@ -8,5 +8,6 @@ namespace Orneholm.RadioText.Core.Storage
     {
         Task<Dictionary<string, Uri>> TransferBlockBlobsIfNotExists(string cloudBlobContainerName, List<TransferBlob> blobs);
         Task<Uri> TransferBlockBlobIfNotExists(string cloudBlobContainerName, string targetBlobName, string sourceUrl, string? contentType = null);
+        Task<Uri> TransferBlockBlobAndOverwrite(string cloudBlobContainerName, string targetBlobName, string sourceUrl, string? contentType = null);
     }
 }

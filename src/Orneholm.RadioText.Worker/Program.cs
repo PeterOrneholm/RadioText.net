@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Rest;
-using Orneholm.RadioText.Azure.SpeechBatchClient;
 using Orneholm.RadioText.Azure.TranslatorClient;
 using Orneholm.RadioText.Core;
 using Orneholm.RadioText.Core.Storage;
@@ -32,6 +32,8 @@ namespace Orneholm.RadioText.Worker
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
+                    ServicePointManager.DefaultConnectionLimit = 100;
+
                     services.AddSingleton<ISverigesRadioApiClient>(s => SverigesRadioApiClient.CreateClient());
 
                     services.AddTransient(x =>

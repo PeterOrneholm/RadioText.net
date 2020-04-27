@@ -167,8 +167,8 @@ namespace Orneholm.RadioText.Core
 
         private static string? GetFileUrl(Episode episode)
         {
-            var fileUrl = episode?.DownloadPodfile?.Url;
-            fileUrl ??= episode?.Broadcast?.BroadcastFiles.FirstOrDefault()?.Url;
+            var fileUrl = episode?.Broadcast?.BroadcastFiles.FirstOrDefault()?.Url;
+            fileUrl ??= episode?.DownloadPodfile?.Url;
 
             return fileUrl;
         }

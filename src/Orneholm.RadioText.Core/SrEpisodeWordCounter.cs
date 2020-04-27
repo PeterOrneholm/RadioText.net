@@ -15,8 +15,8 @@ namespace Orneholm.RadioText.Core
         private readonly IWordCountStorage _wordCountStorage;
         private readonly ILogger<SrEpisodeWordCounter> _logger;
         private readonly string[][] _words = {
-            new [] { "corona" },
-            new [] { "covid", "kovid" },
+            new [] { "corona", "korona", "co rona", "ko rona" },
+            new [] { "covid", "kovid", "kolv vid", "ko vid" },
             new [] { "sars" },
 
             new [] { "pandemi" },
@@ -165,8 +165,8 @@ namespace Orneholm.RadioText.Core
 
         private static int GetEpisodeDuration(Episode episode)
         {
-            var duration = episode?.DownloadPodfile?.DurationInSeconds;
-            duration ??= episode?.Broadcast?.BroadcastFiles.FirstOrDefault()?.Duration;
+            var duration = episode?.Broadcast?.BroadcastFiles.FirstOrDefault()?.Duration;
+            duration ??= episode?.DownloadPodfile?.DurationInSeconds;
 
             return duration ?? 0;
         }

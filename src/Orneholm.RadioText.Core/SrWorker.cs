@@ -12,7 +12,8 @@ namespace Orneholm.RadioText.Core
 {
     public class SrWorker
     {
-        private const int MaxDegreeOfParallelism = 80;
+        private const int MaxDegreeOfParallelism = 50;
+
         private readonly ILogger<SrWorker> _logger;
         private readonly IStorage _storage;
 
@@ -64,6 +65,16 @@ namespace Orneholm.RadioText.Core
             var listEpisodeIds = listEpisode.Select(x => x.Id).ToList();
 
             await WorkOnIds(listEpisodeIds, stoppingToken);
+        }
+
+        public async Task Work(List<int> srEpisodeIds, bool cleanTranscriptions, CancellationToken stoppingToken)
+        {
+            if (cleanTranscriptions)
+            {
+                await _speechBatchClientFactory.CleanExistingTranscriptions();
+            }
+
+            await WorkOnIds(srEpisodeIds, stoppingToken);
         }
 
         private async Task WorkOnIds(List<int> listEpisodeIds, CancellationToken stoppingToken)

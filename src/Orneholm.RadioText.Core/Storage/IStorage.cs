@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Orneholm.RadioText.Core.Storage
@@ -18,5 +19,9 @@ namespace Orneholm.RadioText.Core.Storage
 
         Task<SrStoredEpisodeSpeech?> GetEpisodeSpeech(int episodeId);
         Task StoreEpisodeSpeech(int episodeId, SrStoredEpisodeSpeech episode);
+        Task<List<SrStoredEpisodeStatus>> GetEpisodesWithStatus(string? phase = null, string? state = null);
+        Task DeleteEpisodeStatus(int episodeId);
+        Task<List<SrStoredEpisode>> GetStoredEpisodes();
+        Task DeleteStoredEpisode(int episodeId);
     }
 }

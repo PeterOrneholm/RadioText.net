@@ -99,15 +99,27 @@ namespace Orneholm.RadioText.Core
 
         private async Task<Guid> TranscribeEpisode(SrStoredEpisode storedEpisode, SpeechBatchClient speechBatchClient)
         {
+            var audioUrl = RemoveQueryString(storedEpisode.AudioUrl);
             var transcriptionDefinition = TranscriptionDefinition.Create(
                 $"RadioText - Episode {storedEpisode.Episode.Id}",
                 "RadioText",
                 storedEpisode.AudioLocale,
-                new Uri(storedEpisode.AudioUrl)
+                new Uri(audioUrl)
             );
 
             var transcriptionLocation = await speechBatchClient.PostTranscriptionAsync(transcriptionDefinition);
             return GetTranscriptionGuid(transcriptionLocation);
+        }
+
+        private string RemoveQueryString(string url)
+        {
+            var questionMarkIndex = url.IndexOf("?");
+            if (questionMarkIndex > 0)
+            {
+                return url.Substring(0, questionMarkIndex);
+            }
+
+            return url;
         }
 
         private static Guid GetTranscriptionGuid(Uri transcriptionLocation)

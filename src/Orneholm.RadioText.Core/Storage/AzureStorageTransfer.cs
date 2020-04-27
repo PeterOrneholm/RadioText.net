@@ -82,6 +82,45 @@ namespace Orneholm.RadioText.Core.Storage
             return new Uri(cloudBlockBlob.Uri + sas);
         }
 
+        public async Task<Uri> TransferBlockBlobAndOverwrite(string cloudBlobContainerName, string targetBlobName, string sourceUrl, string? contentType = null)
+        {
+            var cloudBlobContainer = _cloudBlobClient.GetContainerReference(cloudBlobContainerName);
+            await cloudBlobContainer.CreateIfNotExistsAsync(BlobContainerPublicAccessType.Blob, new BlobRequestOptions(), new OperationContext());
+
+            return await TransferBlockBlobAndOverwrite(cloudBlobContainer, targetBlobName, sourceUrl, contentType);
+        }
+
+        public async Task<Uri> TransferBlockBlobAndOverwrite(CloudBlobContainer cloudBlobContainer, string targetBlobName, string sourceUrl, string? contentType = null)
+        {
+            var cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(targetBlobName);
+
+            _logger.LogInformation($"Transfering {sourceUrl} to {targetBlobName}..");
+
+            if (await cloudBlockBlob.ExistsAsync())
+            {
+                await cloudBlockBlob.DeleteAsync();
+                _logger.LogInformation($"Deleted {targetBlobName}...");
+            }
+
+            var blockId = GetBase64Encoded("1");
+            var sourceUri = new Uri(sourceUrl);
+
+            cloudBlockBlob.PutBlock(blockId, sourceUri, 0, null, Checksum.None);
+            await cloudBlockBlob.PutBlockListAsync(new List<string> { blockId });
+
+            _logger.LogInformation($"Transfered {sourceUrl} to {targetBlobName}!");
+
+
+            if (!string.IsNullOrWhiteSpace(contentType))
+            {
+                cloudBlockBlob.Properties.ContentType = contentType;
+                await cloudBlockBlob.SetPropertiesAsync();
+            }
+
+            var sas = GetContainerSasUri(cloudBlobContainer);
+            return new Uri(cloudBlockBlob.Uri + sas);
+        }
+
         private static string GetBase64Encoded(string text)
         {
             var encodedBytes = System.Text.Encoding.Unicode.GetBytes(text);

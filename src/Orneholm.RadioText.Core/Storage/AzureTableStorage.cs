@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos.Table;
@@ -46,6 +48,83 @@ namespace Orneholm.RadioText.Core.Storage
             };
         }
 
+        public async Task<List<SrStoredEpisodeStatus>> GetEpisodesWithStatus(string? phase = null, string? state = null)
+        {
+            await _episodesStatusTable.CreateIfNotExistsAsync();
+
+            var query = new TableQuery<SrStoredEpisodeStatusEntity>
+            {
+                TakeCount = 10000
+            }
+                .OrderBy("RowKey");
+
+            if (phase != null && state != null)
+            {
+                query = query.Where(
+                    TableQuery.CombineFilters(
+                        TableQuery.GenerateFilterCondition("Phase", QueryComparisons.Equal, phase),
+                        TableOperators.And,
+                        TableQuery.GenerateFilterCondition("State", QueryComparisons.Equal, state)
+                    )
+                );
+            }
+            else if (phase != null)
+            {
+                query = query.Where(
+                    TableQuery.GenerateFilterCondition("Phase", QueryComparisons.Equal, phase)
+                );
+            }
+            else if (state != null)
+            {
+                query = query.Where(
+                    TableQuery.GenerateFilterCondition("State", QueryComparisons.Equal, state)
+                );
+            }
+
+            TableContinuationToken? token = null;
+            var items = new List<SrStoredEpisodeStatus>();
+            var finished = false;
+
+            while (!finished)
+            {
+                var result = await _episodesStatusTable.ExecuteQuerySegmentedAsync(query, token);
+
+                items.AddRange(result.Results.Select(x => new SrStoredEpisodeStatus
+                {
+                    EpisodeId = x.EpisodeId,
+
+                    Phase = x.Phase,
+                    State = x.State,
+                    Info = x.Info
+                }));
+
+                token = result.ContinuationToken;
+                if (token == null)
+                {
+                    finished = true;
+                }
+            }
+
+            return items.OrderBy(x => x.EpisodeId).ToList();
+        }
+
+        public async Task DeleteEpisodeStatus(int episodeId)
+        {
+            await _episodesStatusTable.CreateIfNotExistsAsync();
+
+            var retrieveOperation = TableOperation.Retrieve<SrStoredEpisodeStatusEntity>("SrStoredEpisodeStatus", episodeId.ToString("D"));
+            var result = await _episodesTable.ExecuteAsync(retrieveOperation);
+            var srStoredEpisodeStatusEntity = result.Result as SrStoredEpisodeStatusEntity;
+
+            if (srStoredEpisodeStatusEntity == null)
+            {
+                return;
+            }
+
+            var deleteOperation = TableOperation.Delete(srStoredEpisodeStatusEntity);
+            await _episodesStatusTable.ExecuteAsync(deleteOperation);
+        }
+
         public async Task StoreEpisodeStatus(int episodeId, SrStoredEpisodeStatus episode)
         {
             await _episodesStatusTable.CreateIfNotExistsAsync();
@@ -54,6 +133,7 @@ namespace Orneholm.RadioText.Core.Storage
             var insertOrMergeOperation = TableOperation.InsertOrMerge(entity);
             await _episodesStatusTable.ExecuteAsync(insertOrMergeOperation);
         }
+
 
         public async Task<SrStoredEpisode?> GetEpisode(int episodeId)
         {
@@ -80,6 +160,45 @@ namespace Orneholm.RadioText.Core.Storage
             };
         }
 
+        public async Task<List<SrStoredEpisode>> GetStoredEpisodes()
+        {
+            await _episodesTable.CreateIfNotExistsAsync();
+
+            var query = new TableQuery<SrStoredEpisodeEntity>
+                {
+                    TakeCount = 10000
+                }
+                .OrderBy("RowKey");
+
+            TableContinuationToken? token = null;
+            var items = new List<SrStoredEpisode>();
+            var finished = false;
+
+            while (!finished)
+            {
+                var result = await _episodesTable.ExecuteQuerySegmentedAsync(query, token);
+
+                items.AddRange(result.Results.Select(x => new SrStoredEpisode
+                {
+                    Episode = x.Episode,
+
+                    OriginalAudioUrl = x.OriginalAudioUrl,
+                    AudioBlobIdentifier = x.AudioBlobIdentifier,
+                    AudioUrl = x.AudioUrl,
+                    AudioExtension = x.AudioExtension,
+                    AudioLocale = x.AudioLocale
+                }));
+
+                token = result.ContinuationToken;
+                if (token == null)
+                {
+                    finished = true;
+                }
+            }
+
+            return items.OrderBy(x => x.Episode.Id).ToList();
+        }
+
         public async Task StoreEpisode(int episodeId, SrStoredEpisode episode)
         {
             await _episodesTable.CreateIfNotExistsAsync();
@@ -87,6 +206,23 @@ namespace Orneholm.RadioText.Core.Storage
             var entity = new SrStoredEpisodeEntity(episodeId, episode);
             var insertOrMergeOperation = TableOperation.InsertOrMerge(entity);
             await _episodesTable.ExecuteAsync(insertOrMergeOperation);
+        }
+
+        public async Task DeleteStoredEpisode(int episodeId)
+        {
+            await _episodesTable.CreateIfNotExistsAsync();
+
+            var retrieveOperation = TableOperation.Retrieve<SrStoredEpisodeEntity>("SrStoredEpisode", episodeId.ToString("D"));
+            var result = await _episodesTable.ExecuteAsync(retrieveOperation);
+            var srStoredEpisodeEntity = result.Result as SrStoredEpisodeEntity;
+
+            if (srStoredEpisodeEntity == null)
+            {
+                return;
+            }
+
+            var deleteOperation = TableOperation.Delete(srStoredEpisodeEntity);
+            await _episodesTable.ExecuteAsync(deleteOperation);
         }
 
         public async Task<SrStoredEpisodeTranscription?> GetEpisodeTranscription(int episodeId)
