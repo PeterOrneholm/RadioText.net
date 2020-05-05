@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Storage;
@@ -110,6 +111,40 @@ namespace Orneholm.RadioText.Core.Storage
 
             _logger.LogInformation($"Transfered {sourceUrl} to {targetBlobName}!");
 
+
+            if (!string.IsNullOrWhiteSpace(contentType))
+            {
+                cloudBlockBlob.Properties.ContentType = contentType;
+                await cloudBlockBlob.SetPropertiesAsync();
+            }
+
+            var sas = GetContainerSasUri(cloudBlobContainer);
+            return new Uri(cloudBlockBlob.Uri + sas);
+        }
+
+        public async Task<Uri> UploadBlockBlobAndOverwrite(string cloudBlobContainerName, string targetBlobName, Stream stream, string? contentType = null)
+        {
+            var cloudBlobContainer = _cloudBlobClient.GetContainerReference(cloudBlobContainerName);
+            await cloudBlobContainer.CreateIfNotExistsAsync(BlobContainerPublicAccessType.Blob, new BlobRequestOptions(), new OperationContext());
+
+            return await UploadBlockBlobAndOverwrite(cloudBlobContainer, targetBlobName, stream, contentType);
+        }
+
+        public async Task<Uri> UploadBlockBlobAndOverwrite(CloudBlobContainer cloudBlobContainer, string targetBlobName, Stream stream, string? contentType = null)
+        {
+            var cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(targetBlobName);
+
+            _logger.LogInformation($"Transfering stream to {targetBlobName}..");
+
+            if (await cloudBlockBlob.ExistsAsync())
+            {
+                await cloudBlockBlob.DeleteAsync();
+                _logger.LogInformation($"Deleted {targetBlobName}...");
+            }
+
+            await cloudBlockBlob.UploadFromStreamAsync(stream);
+
+            _logger.LogInformation($"Transfered stream to {targetBlobName}!");
 
             if (!string.IsNullOrWhiteSpace(contentType))
             {

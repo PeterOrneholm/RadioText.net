@@ -98,7 +98,8 @@ namespace Orneholm.RadioText.Worker
                         s.GetRequiredService<IStorageTransfer>(),
                         s.GetRequiredService<ISverigesRadioApiClient>(),
                         s.GetRequiredService<ILogger<SrEpisodeCollector>>(),
-                        s.GetRequiredService<IStorage>()
+                        s.GetRequiredService<IStorage>(),
+                        hostContext.Configuration["FFMpeg:Location"]
                     ));
 
                     services.AddTransient(s => new SrEpisodeTranscriber(

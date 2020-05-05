@@ -32,7 +32,7 @@ namespace Orneholm.RadioText.Worker
 
         private static readonly List<int> SrEpisodes = new List<int>
         {
-            1407958
+            1467478
         };
 
 
@@ -51,31 +51,63 @@ namespace Orneholm.RadioText.Worker
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            foreach (var episodeId in SrEpisodes)
+            {
+                await _storage.DeleteEpisodeStatus(episodeId);
+                await _storage.DeleteStoredEpisode(episodeId);
+            }
+
             while (!stoppingToken.IsCancellationRequested)
             {
-                await _srWorker.Work(SrProgramWithDates, true, stoppingToken);
+                //await _srWorker.Work(SrEpisodes, true, stoppingToken);
 
                 //await _srWorker.ReRunPhase("Collect", "Error", true, stoppingToken);
-                //await ReRunWithError(stoppingToken);
+                await ReRunWith(null, SrStoredEpisodeStates.Error, stoppingToken);
 
                 await Task.Delay(TimeSpan.FromMinutes(15), stoppingToken);
             }
         }
 
-        private async Task ReRunWithError(CancellationToken stoppingToken)
+        private async Task ReRunWith(SrStoredEpisodePhases? phase, string? state, CancellationToken stoppingToken)
         {
-            var allErrorEpisodes = await _storage.GetEpisodesWithStatus(null, SrStoredEpisodeStates.Error);
-            var episodeInfos = await _sverigesRadioApiClient.GetEpisodesAsync(allErrorEpisodes.Select(x => x.EpisodeId).ToList(), ListPagination.TakeFirst(allErrorEpisodes.Count));
+            var allErrorEpisodes = await _storage.GetEpisodesWithStatus(phase?.ToString(), state);
+            if (!allErrorEpisodes.Any())
+            {
+                return;
+            }
 
+            var episodeInfos = await _sverigesRadioApiClient.GetEpisodesAsync(allErrorEpisodes.Select(x => x.EpisodeId).ToList(), ListPagination.TakeFirst(allErrorEpisodes.Count));
+            var ids = new StringBuilder();
             foreach (var episode in episodeInfos.Episodes.OrderBy(x => x.PublishDateUtc))
             {
                 await _storage.DeleteEpisodeStatus(episode.Id);
                 await _storage.DeleteStoredEpisode(episode.Id);
 
-                _logger.LogInformation($"Deleted {episode.Id} - {episode.PublishDateUtc}...");
+                _logger.LogInformation($"Deleting {episode.Id} - {episode.PublishDateUtc} - {episode.Title}...");
             }
 
             await _srWorker.Work(allErrorEpisodes.Select(x => x.EpisodeId).ToList(), true, stoppingToken);
+        }
+
+        private async Task WriteEpisodeInfos(SrStoredEpisodePhases? phase, string? state)
+        {
+            var allErrorEpisodes = await _storage.GetEpisodesWithStatus(phase?.ToString(), state);
+            if (!allErrorEpisodes.Any())
+            {
+                return;
+            }
+
+            var episodeInfos = await _sverigesRadioApiClient.GetEpisodesAsync(allErrorEpisodes.Select(x => x.EpisodeId).ToList(), ListPagination.TakeFirst(allErrorEpisodes.Count));
+            var ids = new StringBuilder();
+            foreach (var episode in episodeInfos.Episodes.OrderBy(x => x.PublishDateUtc))
+            {
+                ids.AppendLine($"{episode.Id} - {episode.PublishDateUtc} - {episode.Title}...");
+            }
+
+            var idsString = ids.ToString();
+            Console.Write(idsString);
+
+            Console.ReadLine();
         }
     }
 }

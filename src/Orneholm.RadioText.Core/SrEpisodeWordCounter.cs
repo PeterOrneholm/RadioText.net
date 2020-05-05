@@ -155,12 +155,12 @@ namespace Orneholm.RadioText.Core
 
         private static string GetMaxLengthForTableStorage(string text)
         {
-            if (string.IsNullOrEmpty(text) || text.Length <= 60000)
+            if (string.IsNullOrEmpty(text) || text.Length <= 10000)
             {
                 return text;
             }
 
-            return text.Substring(0, 60000 - 3) + "...";
+            return text.Substring(0, 10000 - 3) + "...";
         }
 
         private static int GetEpisodeDuration(Episode episode)

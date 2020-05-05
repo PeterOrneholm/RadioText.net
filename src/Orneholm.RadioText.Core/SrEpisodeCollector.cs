@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Orneholm.RadioText.Core.Storage;
@@ -20,14 +23,16 @@ namespace Orneholm.RadioText.Core
         private readonly ILogger<SrEpisodeCollector> _logger;
         private readonly IStorageTransfer _storageTransfer;
         private readonly IStorage _storage;
+        private readonly string _ffMpegLocation;
         private readonly HttpClient _httpClientNoRedirect;
 
-        public SrEpisodeCollector(string cloudBlobContainerName, IStorageTransfer storageTransfer, ISverigesRadioApiClient sverigesRadioApiClient, ILogger<SrEpisodeCollector> logger, IStorage storage)
+        public SrEpisodeCollector(string cloudBlobContainerName, IStorageTransfer storageTransfer, ISverigesRadioApiClient sverigesRadioApiClient, ILogger<SrEpisodeCollector> logger, IStorage storage, string ffMpegLocation)
         {
             _cloudBlobContainerName = cloudBlobContainerName;
             _sverigesRadioApiClient = sverigesRadioApiClient;
             _logger = logger;
             _storage = storage;
+            _ffMpegLocation = ffMpegLocation;
             _storageTransfer = storageTransfer;
 
             _httpClientNoRedirect = new HttpClient(new HttpClientHandler
@@ -55,8 +60,17 @@ namespace Orneholm.RadioText.Core
             }
 
             storedEpisode = await GetStoredEpisodeModel(fileUrl, episode);
-            var transferAudioBlockBlob = await _storageTransfer.TransferBlockBlobIfNotExists(_cloudBlobContainerName, storedEpisode.AudioBlobIdentifier, storedEpisode.OriginalAudioUrl, GetContentType(storedEpisode.AudioBlobIdentifier));
-            storedEpisode.AudioUrl = transferAudioBlockBlob.ToString();
+            var audioStream = await GetOnlyAudioStream(storedEpisode.OriginalAudioUrl);
+            if (audioStream == null)
+            {
+                var transferAudioBlockBlob = await _storageTransfer.TransferBlockBlobAndOverwrite(_cloudBlobContainerName, storedEpisode.AudioBlobIdentifier, storedEpisode.OriginalAudioUrl, GetContentType(storedEpisode.AudioBlobIdentifier));
+                storedEpisode.AudioUrl = transferAudioBlockBlob.ToString();
+            }
+            else
+            {
+                var uploadedAudioBlockBlob = await _storageTransfer.UploadBlockBlobAndOverwrite(_cloudBlobContainerName, storedEpisode.AudioBlobIdentifier, audioStream, GetContentType(storedEpisode.AudioBlobIdentifier));
+                storedEpisode.AudioUrl = uploadedAudioBlockBlob.ToString();
+            }
 
             await _storageTransfer.TransferBlockBlobIfNotExists(_cloudBlobContainerName, storedEpisode.ImageBlobIdentifier, storedEpisode.Episode.ImageUrlTemplate, GetContentType(storedEpisode.ImageBlobIdentifier));
 
@@ -171,6 +185,30 @@ namespace Orneholm.RadioText.Core
             fileUrl ??= episode?.DownloadPodfile?.Url;
 
             return fileUrl;
+        }
+
+
+        private async Task<Stream?> GetOnlyAudioStream(string url)
+        {
+            if (string.IsNullOrWhiteSpace(_ffMpegLocation))
+            {
+                return null;
+            }
+
+            var tempFile = Path.GetTempFileName() + ".mp3";
+            var ffMpegCommand = $"-i \"{url}\" -map 0:a -codec:a copy \"{tempFile}\"";
+            var result = await ProcessAsyncHelper.ExecuteShellCommand(_ffMpegLocation, ffMpegCommand, 60000);
+
+            if (result.ExitCode != 0)
+            {
+                return null;
+            }
+
+            var stream = new MemoryStream(File.ReadAllBytes(tempFile));
+            stream.Seek(0, SeekOrigin.Begin);
+            File.Delete(tempFile);
+
+            return stream;
         }
     }
 }
