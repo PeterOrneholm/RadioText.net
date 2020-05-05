@@ -113,7 +113,7 @@ namespace Orneholm.RadioText.Core.Storage
             await _episodesStatusTable.CreateIfNotExistsAsync();
 
             var retrieveOperation = TableOperation.Retrieve<SrStoredEpisodeStatusEntity>("SrStoredEpisodeStatus", episodeId.ToString("D"));
-            var result = await _episodesTable.ExecuteAsync(retrieveOperation);
+            var result = await _episodesStatusTable.ExecuteAsync(retrieveOperation);
             var srStoredEpisodeStatusEntity = result.Result as SrStoredEpisodeStatusEntity;
 
             if (srStoredEpisodeStatusEntity == null)
