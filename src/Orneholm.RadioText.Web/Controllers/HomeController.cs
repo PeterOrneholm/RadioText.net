@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -11,34 +10,33 @@ namespace Orneholm.RadioText.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private const int EpisodesListCount = 50;
+        private const int EpisodesListCount = 40;
 
         private readonly ISummaryStorage _summaryStorage;
+        private readonly IEpisodeLister _episodeLister;
         private readonly ImmersiveReaderOptions _immersiveReaderOptions;
 
-        public HomeController(ISummaryStorage summaryStorage, IOptions<ImmersiveReaderOptions> immersiveReaderOptions)
+        public HomeController(IOptions<ImmersiveReaderOptions> immersiveReaderOptions, IEpisodeLister episodeLister, ISummaryStorage summaryStorage)
         {
+            _episodeLister = episodeLister;
             _summaryStorage = summaryStorage;
             _immersiveReaderOptions = immersiveReaderOptions.Value;
         }
 
         [Route("/")]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
         public async Task<IActionResult> Index(string entityName = null, string entityType = null, string keyphrase = null, string query = null, int? programId = null)
         {
-            var episodes = await _summaryStorage.ListMiniSummarizedEpisode(EpisodesListCount);
-
-            var filteredEpisodes = FilterEpisodes(entityName, entityType, keyphrase, episodes, programId);
-            var searchedEpisodes = SearchEpisodes(query, filteredEpisodes);
-            var orderedEpisodes = OrderEpisodes(searchedEpisodes);
-
+            var episodes = await _episodeLister.List(EpisodesListCount, entityName, entityType, keyphrase, query, programId);
             return View(new HomeIndexViewModel
             {
                 SearchQuery = query,
-                Episodes = orderedEpisodes.Take(25).ToList()
+                Episodes = episodes.ToList()
             });
         }
 
         [Route("/episode/{id}")]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
         public async Task<IActionResult> Details(int id)
         {
             var episode = await _summaryStorage.GetSummarizedEpisode(id);
@@ -48,56 +46,6 @@ namespace Orneholm.RadioText.Web.Controllers
                 Episode = episode
             });
         }
-
-        private static IOrderedEnumerable<SrStoredMiniSummarizedEpisode> OrderEpisodes(List<SrStoredMiniSummarizedEpisode> filteredEpisodes)
-        {
-            return filteredEpisodes.OrderByDescending(x => x.PublishDateUtc);
-        }
-
-        private static List<SrStoredMiniSummarizedEpisode> SearchEpisodes(string query, List<SrStoredMiniSummarizedEpisode> episodes)
-        {
-            var filteredEpisodes = episodes;
-
-            if (!string.IsNullOrWhiteSpace(query))
-            {
-                filteredEpisodes = filteredEpisodes
-                    .Where(x => x.Transcription_Original.Text.Contains(query) || x.Transcription_English.Text.Contains(query))
-                    .ToList();
-            }
-
-            return filteredEpisodes;
-        }
-
-        private static List<SrStoredMiniSummarizedEpisode> FilterEpisodes(string entityName, string entityType, string keyphrase, List<SrStoredMiniSummarizedEpisode> episodes, int? programId)
-        {
-            var filteredEpisodes = episodes;
-
-            if (programId.HasValue)
-            {
-                filteredEpisodes = filteredEpisodes
-                    .Where(x => x.ProgramId == programId)
-                    .ToList();
-            }
-
-            if (!string.IsNullOrWhiteSpace(entityName))
-            {
-                filteredEpisodes = filteredEpisodes
-                    .Where(x => x.Transcription_Original.Entities.Any(y => y.Name == entityName && (string.IsNullOrWhiteSpace(entityType) || y.Type == entityType))
-                    || x.Transcription_English.Entities.Any(y => y.Name == entityName && (string.IsNullOrWhiteSpace(entityType) || y.Type == entityType)))
-                    .ToList();
-            }
-
-            if (!string.IsNullOrWhiteSpace(keyphrase))
-            {
-                filteredEpisodes = filteredEpisodes
-                    .Where(x => x.Transcription_Original.KeyPhrases.Contains(keyphrase)
-                    || x.Transcription_English.KeyPhrases.Contains(keyphrase))
-                    .ToList();
-            }
-
-            return filteredEpisodes;
-        }
-
 
         [HttpGet("/api/immersivereader/token")]
         public async Task<JsonResult> GetTokenAndSubdomain()

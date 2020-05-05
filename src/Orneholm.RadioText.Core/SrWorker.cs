@@ -41,6 +41,25 @@ namespace Orneholm.RadioText.Core
             _speechBatchClientFactory = speechBatchClientFactory;
         }
 
+        public async Task ReRunPhase(string? phase, string? state, bool cleanTranscriptions, CancellationToken stoppingToken)
+        {
+            if (cleanTranscriptions)
+            {
+                await _speechBatchClientFactory.CleanExistingTranscriptions();
+            }
+
+            var allEpisodesWithStatus = await _storage.GetEpisodesWithStatus(phase, state);
+            var allEpisodesWithStatusIds = allEpisodesWithStatus.Select(x => x.EpisodeId).ToList();
+
+            foreach (var episodeId in allEpisodesWithStatusIds)
+            {
+                Console.WriteLine($"Deleting status for episode {episodeId}");
+                await _storage.DeleteEpisodeStatus(episodeId);
+            }
+
+            await WorkOnIds(allEpisodesWithStatusIds, stoppingToken);
+        }
+
         public async Task Work(Dictionary<int, int> srPrograms, bool cleanTranscriptions, CancellationToken stoppingToken)
         {
             if (cleanTranscriptions)

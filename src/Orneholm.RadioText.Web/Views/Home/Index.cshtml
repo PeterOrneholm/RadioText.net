@@ -36,7 +36,7 @@
                                 <h6 class="card-subtitle mb-2 text-muted"><a href="/?programId=@episode.ProgramId">@episode.ProgramName</a></h6>
 
                                 <p class="card-text rt-episode-list-transcription">
-                                    @episode.Transcription_English.Text
+                                    @episode.Transcription_English.Text.Substring(0, 400)
                                 </p>
 
                                 <p class="card-text">

@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Orneholm.RadioText.Core.Storage;
+using Orneholm.RadioText.Web.Controllers;
 using Orneholm.RadioText.Web.Models;
 
 namespace Orneholm.RadioText.Web
@@ -32,6 +34,12 @@ namespace Orneholm.RadioText.Web
             services.AddTransient<ISummaryStorage, SummaryAzureTableStorage>(s => new SummaryAzureTableStorage(
                 s.GetRequiredService<CloudTableClient>(),
                 Configuration["AzureStorage:EpisodeSummaryTableName"]
+            ));
+
+            services.AddTransient<EpisodeLister>();
+            services.AddTransient<IEpisodeLister, CachedEpisodeLister>(s => new CachedEpisodeLister(
+                s.GetRequiredService<EpisodeLister>(),
+                s.GetRequiredService<IMemoryCache>()
             ));
 
             services.Configure<GoogleAnalyticsOptions>(Configuration);
