@@ -20,11 +20,8 @@ namespace Orneholm.RadioText.Core.Storage
         {
             await _episodeSummarizedTable.CreateIfNotExistsAsync();
 
-            var query = new TableQuery<SrStoredSummarizedEpisodeEntity>
-            {
-                TakeCount = count
-            }
-            .OrderByDesc("RowKey");
+            var query = new TableQuery<SrStoredSummarizedEpisodeEntity> {TakeCount = count}
+                .OrderByDesc("RowKey");
 
             TableContinuationToken? token = null;
             var items = new List<SrStoredSummarizedEpisode>();
@@ -57,27 +54,23 @@ namespace Orneholm.RadioText.Core.Storage
                 {
                     nameof(SrStoredSummarizedEpisodeEntity.PartitionKey),
                     nameof(SrStoredSummarizedEpisodeEntity.RowKey),
-
                     nameof(SrStoredSummarizedEpisodeEntity.EpisodeId),
-
                     nameof(SrStoredSummarizedEpisodeEntity.OriginalAudioUrl),
                     nameof(SrStoredSummarizedEpisodeEntity.Title),
                     nameof(SrStoredSummarizedEpisodeEntity.Title_EN_Json),
                     nameof(SrStoredSummarizedEpisodeEntity.Description),
                     nameof(SrStoredSummarizedEpisodeEntity.Url),
-
                     nameof(SrStoredSummarizedEpisodeEntity.PublishDateUtc),
                     nameof(SrStoredSummarizedEpisodeEntity.ImageUrl),
-
                     nameof(SrStoredSummarizedEpisodeEntity.ProgramId),
                     nameof(SrStoredSummarizedEpisodeEntity.ProgramName),
-
                     nameof(SrStoredSummarizedEpisodeEntity.Transcription_Original_Json),
                     nameof(SrStoredSummarizedEpisodeEntity.Transcription_EN_Json),
-
                     nameof(SrStoredSummarizedEpisodeEntity.SpeechUrl_EN),
                 }
             }.OrderByDesc("RowKey");
+
+            var requestOptions = new TableRequestOptions {TableQueryMaxItemCount = count};
 
             TableContinuationToken? token = null;
             var items = new List<SrStoredMiniSummarizedEpisode>();
@@ -85,12 +78,13 @@ namespace Orneholm.RadioText.Core.Storage
 
             while (!finished)
             {
-                var result = await _episodeSummarizedTable.ExecuteQuerySegmentedAsync(query, token);
+                var result =
+                    await _episodeSummarizedTable.ExecuteQuerySegmentedAsync(query, token, requestOptions, null);
 
                 items.AddRange(result.Results.Select(MapMini));
 
                 token = result.ContinuationToken;
-                if (token == null)
+                if (token == null || items.Count >= count)
                 {
                     finished = true;
                 }
@@ -103,7 +97,9 @@ namespace Orneholm.RadioText.Core.Storage
         {
             await _episodeSummarizedTable.CreateIfNotExistsAsync();
 
-            var retrieveOperation = TableOperation.Retrieve<SrStoredSummarizedEpisodeEntity>("SrStoredSummarizedEpisode", episodeId.ToString("D"));
+            var retrieveOperation =
+                TableOperation.Retrieve<SrStoredSummarizedEpisodeEntity>("SrStoredSummarizedEpisode",
+                    episodeId.ToString("D"));
             var result = await _episodeSummarizedTable.ExecuteAsync(retrieveOperation);
             var srStoredSummarizedEpisodeEntity = result.Result as SrStoredSummarizedEpisodeEntity;
 
@@ -120,12 +116,9 @@ namespace Orneholm.RadioText.Core.Storage
             return new SrStoredSummarizedEpisode
             {
                 EpisodeId = srStoredSummarizedEpisodeEntity.EpisodeId,
-
                 OriginalAudioUrl = srStoredSummarizedEpisodeEntity.OriginalAudioUrl,
-
                 AudioUrl = srStoredSummarizedEpisodeEntity.AudioUrl,
                 AudioLocale = srStoredSummarizedEpisodeEntity.AudioLocale,
-
                 Title = srStoredSummarizedEpisodeEntity.Title,
                 Description = srStoredSummarizedEpisodeEntity.Description,
                 Url = srStoredSummarizedEpisodeEntity.Url,
@@ -133,18 +126,14 @@ namespace Orneholm.RadioText.Core.Storage
                 ImageUrl = srStoredSummarizedEpisodeEntity.ImageUrl,
                 ProgramId = srStoredSummarizedEpisodeEntity.ProgramId,
                 ProgramName = srStoredSummarizedEpisodeEntity.ProgramName,
-
                 Transcription = srStoredSummarizedEpisodeEntity.Transcription,
-
                 Title_Original = srStoredSummarizedEpisodeEntity.Title_Original,
                 Description_Original = srStoredSummarizedEpisodeEntity.Description_Original,
                 Transcription_Original = srStoredSummarizedEpisodeEntity.Transcription_Original,
-
                 Title_EN = srStoredSummarizedEpisodeEntity.Title_EN,
                 Description_EN = srStoredSummarizedEpisodeEntity.Description_EN,
                 Transcription_EN = srStoredSummarizedEpisodeEntity.Transcription_EN,
                 SpeechUrl_EN = srStoredSummarizedEpisodeEntity.SpeechUrl_EN,
-
                 Title_SV = srStoredSummarizedEpisodeEntity.Title_SV,
                 Description_SV = srStoredSummarizedEpisodeEntity.Description_SV,
                 Transcription_SV = srStoredSummarizedEpisodeEntity.Transcription_SV,
@@ -152,27 +141,23 @@ namespace Orneholm.RadioText.Core.Storage
             };
         }
 
-        private static SrStoredMiniSummarizedEpisode MapMini(SrStoredSummarizedEpisodeEntity srStoredSummarizedEpisodeEntity)
+        private static SrStoredMiniSummarizedEpisode MapMini(
+            SrStoredSummarizedEpisodeEntity srStoredSummarizedEpisodeEntity)
         {
             return new SrStoredMiniSummarizedEpisode
             {
                 EpisodeId = srStoredSummarizedEpisodeEntity.EpisodeId,
-
                 OriginalAudioUrl = srStoredSummarizedEpisodeEntity.OriginalAudioUrl,
-
                 Title = srStoredSummarizedEpisodeEntity.Title,
                 Title_EN = srStoredSummarizedEpisodeEntity.Title_EN,
-
                 Description = srStoredSummarizedEpisodeEntity.Description,
                 Url = srStoredSummarizedEpisodeEntity.Url,
                 PublishDateUtc = srStoredSummarizedEpisodeEntity.PublishDateUtc,
                 ImageUrl = srStoredSummarizedEpisodeEntity.ImageUrl,
                 ProgramId = srStoredSummarizedEpisodeEntity.ProgramId,
                 ProgramName = srStoredSummarizedEpisodeEntity.ProgramName,
-
                 Transcription_Original = srStoredSummarizedEpisodeEntity.Transcription_Original,
                 Transcription_English = srStoredSummarizedEpisodeEntity.Transcription_EN,
-
                 SpeechUrl_EN = srStoredSummarizedEpisodeEntity.SpeechUrl_EN
             };
         }
@@ -252,6 +237,7 @@ namespace Orneholm.RadioText.Core.Storage
                 get => JsonSerializer.Deserialize<EnrichedText>(Title_Original_Json);
                 set => Title_Original_Json = JsonSerializer.Serialize(value);
             }
+
             public string Title_Original_Json { get; set; } = string.Empty;
 
             [IgnoreProperty]
@@ -260,6 +246,7 @@ namespace Orneholm.RadioText.Core.Storage
                 get => JsonSerializer.Deserialize<EnrichedText>(Description_Original_Json);
                 set => Description_Original_Json = JsonSerializer.Serialize(value);
             }
+
             public string Description_Original_Json { get; set; } = string.Empty;
 
             [IgnoreProperty]
@@ -268,6 +255,7 @@ namespace Orneholm.RadioText.Core.Storage
                 get => JsonSerializer.Deserialize<EnrichedText>(Transcription_Original_Json);
                 set => Transcription_Original_Json = JsonSerializer.Serialize(value);
             }
+
             public string Transcription_Original_Json { get; set; } = string.Empty;
 
             [IgnoreProperty]
@@ -276,6 +264,7 @@ namespace Orneholm.RadioText.Core.Storage
                 get => JsonSerializer.Deserialize<EnrichedText>(Title_EN_Json);
                 set => Title_EN_Json = JsonSerializer.Serialize(value);
             }
+
             public string Title_EN_Json { get; set; } = string.Empty;
 
             [IgnoreProperty]
@@ -284,6 +273,7 @@ namespace Orneholm.RadioText.Core.Storage
                 get => JsonSerializer.Deserialize<EnrichedText>(Description_EN_Json);
                 set => Description_EN_Json = JsonSerializer.Serialize(value);
             }
+
             public string Description_EN_Json { get; set; } = string.Empty;
 
             [IgnoreProperty]
@@ -292,6 +282,7 @@ namespace Orneholm.RadioText.Core.Storage
                 get => JsonSerializer.Deserialize<EnrichedText>(Transcription_EN_Json);
                 set => Transcription_EN_Json = JsonSerializer.Serialize(value);
             }
+
             public string Transcription_EN_Json { get; set; } = string.Empty;
 
             public string SpeechUrl_EN { get; set; } = string.Empty;
@@ -303,6 +294,7 @@ namespace Orneholm.RadioText.Core.Storage
                 get => JsonSerializer.Deserialize<EnrichedText>(Title_SV_Json);
                 set => Title_SV_Json = JsonSerializer.Serialize(value);
             }
+
             public string Title_SV_Json { get; set; } = string.Empty;
 
             [IgnoreProperty]
@@ -311,6 +303,7 @@ namespace Orneholm.RadioText.Core.Storage
                 get => JsonSerializer.Deserialize<EnrichedText>(Description_SV_Json);
                 set => Description_SV_Json = JsonSerializer.Serialize(value);
             }
+
             public string Description_SV_Json { get; set; } = string.Empty;
 
             [IgnoreProperty]
@@ -319,6 +312,7 @@ namespace Orneholm.RadioText.Core.Storage
                 get => JsonSerializer.Deserialize<EnrichedText>(Transcription_SV_Json);
                 set => Transcription_SV_Json = JsonSerializer.Serialize(value);
             }
+
             public string Transcription_SV_Json { get; set; } = string.Empty;
 
             public string SpeechUrl_SV { get; set; } = string.Empty;
